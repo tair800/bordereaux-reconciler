@@ -1,0 +1,25 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.env
+*.pem
+keys/
+node_modules/
+.next/
+out/
+.claude/
+
+# Generated corpora are rebuilt by `make corpus` from a committed seed; only the
+# evidence artifacts under artifacts/ are tracked.
+data/generated/
+
+# Terraform: state and provider binaries never enter git. The lock file does.
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!example.tfvars
+crash.log
