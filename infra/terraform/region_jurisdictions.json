@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "what_this_is": "A lookup from Azure region name to the place that region is declared to sit in. Terraform reads it with jsondecode(file(...)) and scripts/residency_manifest.py reads the same bytes, so the two cannot drift apart. That single-source property is the whole point: a residency manifest that derived jurisdiction independently of the module would be asserting a fact rather than reporting one.",
+  "what_this_is_not": "A legal or regulatory determination. Nothing here states that processing in a listed region satisfies GDPR, DORA, the EU AI Act, or any other instrument, and nothing here accounts for the jurisdiction of the operator, of a support engineer with access, or of a lawful-access order served on a parent company. It records where Microsoft publishes a region as being located. Whether that is sufficient is a question for a DPO and counsel, not for a JSON file.",
+  "regions": {
+    "swedencentral": {
+      "display_name": "Sweden Central",
+      "geography": "Sweden",
+      "country_iso": "SE",
+      "residency_boundary": "EU/EEA"
+    },
+    "westeurope": {
+      "display_name": "West Europe",
+      "geography": "Netherlands",
+      "country_iso": "NL",
+      "residency_boundary": "EU/EEA"
+    },
+    "northeurope": {
+      "display_name": "North Europe",
+      "geography": "Ireland",
+      "country_iso": "IE",
+      "residency_boundary": "EU/EEA"
+    },
+    "uksouth": {
+      "display_name": "UK South",
+      "geography": "United Kingdom",
+      "country_iso": "GB",
+      "residency_boundary": "UK"
+    },
+    "eastus": {
+      "display_name": "East US",
+      "geography": "United States",
+      "country_iso": "US",
+      "residency_boundary": "US"
+    }
+  }
+}
