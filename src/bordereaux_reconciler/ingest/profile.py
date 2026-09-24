@@ -114,6 +114,12 @@ def _monetary_share(values: tuple[str, ...], convention: DecimalConvention) -> t
         return 0.0, 0.0
     amounts.sort()
     median = amounts[len(amounts) // 2]
+    # The only `float()` applied to a `Decimal` anywhere in this package, and it is safe for a
+    # specific reason rather than by convention: this number is a **sort key** and nothing else. It
+    # ranks a file's money columns against each other, it never becomes an amount, it never enters a
+    # comparison and it never reaches the ledger. The columns it separates differ by orders of
+    # magnitude — a gross against a tax — so float precision is irrelevant, and `profile_grid`
+    # breaks ties on the header anyway, so even an exact tie stays deterministic.
     return len(amounts) / len(values), float(median)
 
 

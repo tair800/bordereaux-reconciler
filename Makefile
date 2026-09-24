@@ -44,6 +44,9 @@ residency: ## regenerate the committed residency manifests
 artifacts: ## build the eight evidence artifacts (needs a database)
 	$(PY) scripts/build_artifacts.py
 
+artifacts-check: ## fail if the committed evidence no longer matches a fresh build
+	$(PY) scripts/check_artifacts_current.py
+
 lint: ## ruff
 	$(PY) -m ruff check src tests scripts
 	$(PY) -m ruff format --check src tests scripts

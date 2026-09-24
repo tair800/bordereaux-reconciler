@@ -148,6 +148,14 @@ jobs:
       - name: Full suite against a real database
         run: uv run pytest tests -q
 
+      - name: The committed evidence must still be true
+        # `artifacts/` is committed because it is what the README cites and what a reader browsing
+        # the repository sees. That only stays honest if it is current, and "somebody will remember
+        # to rebuild it" is not a mechanism. The comparison excludes `provenance` — commit, OS and
+        # Python patch version legitimately differ between a laptop and a runner — and compares
+        # every measured number.
+        run: uv run python scripts/check_artifacts_current.py
+
       - name: Publish the artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -196,10 +204,13 @@ jobs:
       - name: Plant every breach and check each is caught
         run: uv run python scripts/plant_breaches.py
 
-      - name: The working tree must be exactly as it was
-        # The script restores from the bytes it read and verifies it. This is the independent
-        # check: if a breach ever survived a crash, the diff below is how anybody would find out.
-        run: git diff --exit-code
+      - name: No planted breach survived
+        # Scoped to the paths a breach can be planted in, rather than the whole tree. The previous
+        # step rebuilds `artifacts/`, whose provenance block records the commit and the runner's OS,
+        # so an unscoped `git diff` failed on build output and said nothing about whether a breach
+        # had survived. A check that fires for the wrong reason is worse than no check: it gets
+        # muted, and then the right reason goes unnoticed too.
+        run: git diff --exit-code -- src tests scripts infra alembic
 
   docker:
     name: image builds and serves
