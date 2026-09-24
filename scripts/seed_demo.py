@@ -48,10 +48,14 @@ from bordereaux_reconciler.store.ledger import (  # noqa: E402
 )
 from bordereaux_reconciler.store.schema import ingested_file  # noqa: E402
 
-#: How long to wait for the database. A managed Postgres can take the better part of a minute to
-#: accept connections after a fresh provision, and a container that gave up in five seconds would
-#: make a first deploy look like a code failure.
-CONNECT_TIMEOUT_SECONDS = 120
+#: How long to wait for the database before giving up and serving anyway.
+#:
+#: Long enough for a freshly provisioned managed Postgres, which can take most of a minute to accept
+#: its first connection — a container that gave up in five seconds would make a first deploy look
+#: like a code failure. Short enough that a container with no database at all still binds its port
+#: promptly: this blocks uvicorn, and a web service that does not listen for two minutes is
+#: indistinguishable from one that has crashed, to a platform health check and to a person.
+CONNECT_TIMEOUT_SECONDS = 60
 CONNECT_INTERVAL_SECONDS = 3
 
 #: Who the seeded mapping contracts are attributed to. **Not** a person's name: these were confirmed
@@ -78,6 +82,11 @@ def _wait_for_database() -> Engine:
             last = exc
             time.sleep(CONNECT_INTERVAL_SECONDS)
     raise SystemExit(f"[seed] the database never accepted a connection: {last}")
+
+
+#: Exit code used when the database never arrived. The entrypoint ignores it and starts uvicorn
+#: regardless — `/healthz` then reports `degraded`, which is a more useful thing to serve than
+#: nothing at all.
 
 
 def _migrate() -> None:

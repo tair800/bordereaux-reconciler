@@ -213,29 +213,76 @@ jobs:
         run: git diff --exit-code -- src tests scripts infra alembic
 
   docker:
-    name: image builds and serves
+    name: image builds, seeds and serves
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: bordereaux
+          POSTGRES_PASSWORD: ci_only_not_a_secret
+          POSTGRES_DB: bordereaux
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U bordereaux -d bordereaux"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
     steps:
       - uses: actions/checkout@v4
 
       - name: Build
         run: docker build -t bordereaux-reconciler:ci .
 
-      - name: It starts and answers, without a database
-        # The console needs a database; `/healthz` is expected to report `degraded` without one and
-        # still answer. A container that hung or crashed here would pass a "does it build" check
-        # and fail the first time anybody deployed it.
+      - name: It serves without any infrastructure at all
+        # Proves the image does not depend on a database to start. `BX_SKIP_SEED` is what makes
+        # this fast: without it the entrypoint would spend its full connect timeout waiting for a
+        # database this step deliberately does not provide.
         run: |
-          docker run -d --name bx -p 8000:8000 -e BX_ENVIRONMENT=ci bordereaux-reconciler:ci
+          docker run -d --name bx-bare -p 8001:8000             -e BX_ENVIRONMENT=ci -e BX_SKIP_SEED=true bordereaux-reconciler:ci
           for i in $(seq 1 30); do
-            code=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8000/healthz || true)
-            if [ "$code" = "200" ] || [ "$code" = "503" ]; then
-              echo "healthz answered $code"
-              exit 0
-            fi
+            code=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8001/healthz || true)
+            if [ "$code" = "503" ]; then echo "degraded, as expected without a database"; exit 0; fi
+            if [ "$code" = "200" ]; then echo "unexpectedly healthy with no database"; exit 1; fi
             sleep 2
           done
-          echo "the container never answered"
+          echo "the container never answered"; docker logs bx-bare; exit 1
+
+      - name: It migrates, seeds and serves against a real database
+        # The path a deployment actually takes, end to end, from a schema-less database — and with
+        # the `postgres://` scheme a hosting provider emits rather than the one the code prefers,
+        # because that difference cost a deploy.
+        run: |
+          docker run -d --name bx -p 8000:8000 --network host             -e PORT=8000 -e BX_ENVIRONMENT=ci             -e BX_DATABASE_URL='postgres://bordereaux:ci_only_not_a_secret@localhost:5432/bordereaux'             bordereaux-reconciler:ci
+          for i in $(seq 1 60); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8000/healthz || true)
+            if [ "$code" = "200" ]; then echo "healthy"; break; fi
+            sleep 2
+          done
           docker logs bx
-          exit 1
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8000/healthz)" = "200"
+
+      - name: Every screen renders and the write gate refuses
+        run: |
+          for path in / /evidence /quarantine /mappings; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "http://localhost:8000$path")
+            echo "$path -> $code"
+            test "$code" = "200"
+          done
+          code=$(curl -s -o /dev/null -w '%{http_code}' -X POST             http://localhost:8000/mappings/ci/confirm             -H 'content-type: application/json'             -H 'X-Approver-Token: guess'             -d '{"family":"insurance","columns":{"A":"gross_premium"}}')
+          echo "POST confirm -> $code"
+          test "$code" = "403"
+
+      - name: A restart writes nothing
+        # Kill condition B, on the deployment path rather than in the evidence lane.
+        run: |
+          before=$(curl -s http://localhost:8000/healthz)
+          docker restart bx
+          for i in $(seq 1 60); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8000/healthz || true)
+            if [ "$code" = "200" ]; then break; fi
+            sleep 2
+          done
+          docker logs bx 2>&1 | grep -q 'already holds data'             || { echo 'the seed did not detect existing data'; docker logs bx; exit 1; }
+          echo "re-seed skipped, as it must be"
