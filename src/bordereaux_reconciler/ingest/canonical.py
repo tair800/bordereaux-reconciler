@@ -146,8 +146,8 @@ def normalise_period(raw: str, *, day_first: bool) -> str | None:
 
     if match := re.match(r"^(?:\d{1,2}\s+)?([A-Za-z]{3,9})\s+(\d{4})$", text):
         word = match.group(1).lower()
-        month = _MONTHS.get(word[:4]) or _MONTHS.get(word[:3])
-        return f"{int(match.group(2)):04d}-{month:02d}" if month else None
+        named = _MONTHS.get(word[:4]) or _MONTHS.get(word[:3])
+        return f"{int(match.group(2)):04d}-{named:02d}" if named else None
 
     return None
 

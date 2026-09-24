@@ -31,7 +31,7 @@ from bordereaux_reconciler.adapters import (
 class MarketplaceAdapter:
     family = "marketplace"
 
-    fields = (
+    fields: tuple[CanonicalField, ...] = (
         CanonicalField(
             name="order_reference",
             role=KEY,

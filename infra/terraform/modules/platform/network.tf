@@ -86,10 +86,10 @@ resource "azurerm_private_dns_zone_virtual_network_link" "this" {
   name = "link-${each.key}"
   # azurerm 5.x takes the zone id here. Earlier majors took resource_group_name plus
   # private_dns_zone_name, so this is another line an older example gets wrong.
-  private_dns_zone_id   = azurerm_private_dns_zone.this[each.key].id
-  virtual_network_id    = azurerm_virtual_network.this[0].id
-  registration_enabled  = false
-  tags                  = local.tags
+  private_dns_zone_id  = azurerm_private_dns_zone.this[each.key].id
+  virtual_network_id   = azurerm_virtual_network.this[0].id
+  registration_enabled = false
+  tags                 = local.tags
 }
 
 locals {

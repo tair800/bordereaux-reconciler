@@ -27,10 +27,8 @@ __all__ = ["FixtureRandom"]
 class FixtureRandom:
     """A named, reproducible stream of draws for synthetic fixture data.
 
-    Every method carries a ``noqa: S311`` because the linter is right in general and wrong here:
-    these draws decide what a fake premium is, never what a token or a key is. There is no
-    cryptographic use anywhere in this package, and reaching for :mod:`secrets` would make the
-    corpus unreproducible, which is the one property it cannot lose.
+    The single :mod:`random` construction is suppressed at its own line with the reason written
+    beside it; nothing else in the class touches the module-level generator.
     """
 
     __slots__ = ("_rng", "name")
@@ -38,7 +36,11 @@ class FixtureRandom:
     def __init__(self, *parts: str | int) -> None:
         self.name = "|".join(str(part) for part in parts)
         digest = hashlib.blake2b(self.name.encode("utf-8"), digest_size=8).digest()
-        self._rng = random.Random(int.from_bytes(digest, "big"))
+        # S311 is suppressed below, and the linter is right in general and wrong here: these draws
+        # decide what a fake premium is, never what a token or a key is. There is no cryptographic
+        # use anywhere in this package, and `secrets` would make the corpus unreproducible, which
+        # is the one property it cannot lose.
+        self._rng = random.Random(int.from_bytes(digest, "big"))  # noqa: S311
 
     def integer(self, low: int, high: int) -> int:
         """An integer in ``[low, high]``."""

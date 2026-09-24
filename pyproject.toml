@@ -24,6 +24,7 @@ dev = [
   "mypy>=1.13",
   "playwright>=1.49",
   "openpyxl>=3.1",
+  "types-openpyxl>=3.1",
 ]
 
 [build-system]

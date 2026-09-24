@@ -7,16 +7,16 @@ locals {
   compact = "brdx${var.environment}${var.name_suffix}"
 
   names = {
-    resource_group    = "rg-${local.base}"
-    log_analytics     = "log-${local.base}"
-    identity          = "id-${local.base}"
-    key_vault         = "kv-${local.base}-${var.name_suffix}"
-    storage_account   = "st${local.compact}"
+    resource_group     = "rg-${local.base}"
+    log_analytics      = "log-${local.base}"
+    identity           = "id-${local.base}"
+    key_vault          = "kv-${local.base}-${var.name_suffix}"
+    storage_account    = "st${local.compact}"
     container_registry = "cr${local.compact}"
-    postgres          = "psql-${local.base}-${var.name_suffix}"
-    container_app_env = "cae-${local.base}"
-    action_group      = "ag-${local.base}"
-    virtual_network   = "vnet-${local.base}"
+    postgres           = "psql-${local.base}-${var.name_suffix}"
+    container_app_env  = "cae-${local.base}"
+    action_group       = "ag-${local.base}"
+    virtual_network    = "vnet-${local.base}"
   }
 
   # The residency table is read once here and handed to outputs.tf. Terraform and

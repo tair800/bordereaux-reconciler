@@ -28,7 +28,7 @@ from bordereaux_reconciler.adapters import (
 class InsuranceAdapter:
     family = "insurance"
 
-    fields = (
+    fields: tuple[CanonicalField, ...] = (
         CanonicalField(
             name="policy_reference",
             role=KEY,

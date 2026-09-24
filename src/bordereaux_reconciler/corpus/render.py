@@ -10,12 +10,14 @@ real bordereaux contain, because the currency symbols and thousands separators f
 (A variant with genuinely numeric cells would be a worthwhile fourteenth perturbation. It is not
 built, and it is not claimed.)
 
-**Byte-identical output means defeating three clocks.** A CSV is easy: fixed line terminator, fixed
-encoding. An XLSX is a zip, and both openpyxl and :mod:`zipfile` reach for the wall clock —
-`docProps/core.xml` gets a created and modified timestamp, and every zip entry gets an mtime from
-`time.localtime()`. So the document properties are pinned and the finished archive is rewritten
-with a fixed entry timestamp and a stable entry order. Without that rewrite, two runs a second
-apart produce different bytes and the determinism claim quietly becomes a determinism hope.
+**Byte-identical output means defeating two clocks.** A CSV is easy: fixed line terminator, fixed
+encoding. An XLSX is a zip, and both openpyxl and :mod:`zipfile` reach for the wall clock — every
+zip entry gets an mtime from `time.localtime()`, and openpyxl stamps `docProps/core.xml` with
+`datetime.now()` *during* the save, overwriting whatever the caller set. So the finished archive is
+rewritten: fixed entry timestamps, sorted entry order, and the modified property replaced with a
+declared constant. Without that rewrite two runs a second apart produce different bytes — which is
+not a hypothetical, it is what the first build of this corpus actually did, in those three files
+and nowhere else.
 
 **The formatting is the perturbation.** A variant's declared decimal convention, currency style and
 date format are applied here and nowhere else, which is what keeps the declaration in
@@ -28,13 +30,14 @@ import csv
 import datetime as dt
 import io
 import json
+import re
 import zipfile
 from collections.abc import Sequence
 from decimal import Decimal
 from pathlib import Path
 from typing import Final
 
-from openpyxl import Workbook  # type: ignore[import-untyped]
+from openpyxl import Workbook
 
 from bordereaux_reconciler.corpus.rng import FixtureRandom
 from bordereaux_reconciler.corpus.truth import TruthRow, quantise
@@ -91,6 +94,10 @@ _GROUP: Final = 3
 _ZIP_EPOCH: Final = (1980, 1, 1, 0, 0, 0)
 _DOC_TIMESTAMP: Final = dt.datetime(2026, 1, 1, 0, 0, 0, tzinfo=dt.UTC)
 _DOC_AUTHOR: Final = "bordereaux-reconciler synthetic corpus generator"
+
+#: The archive member openpyxl writes the wall clock into, and the element it writes it as.
+_CORE_PROPERTIES: Final = "docProps/core.xml"
+_MODIFIED: Final = re.compile(r"<dcterms:modified[^>]*>[^<]*</dcterms:modified>")
 
 #: The label the declared-total footer puts in the first column.
 _TOTAL_LABEL: Final = "TOTAL"
@@ -322,8 +329,11 @@ def write_xlsx(
 ) -> None:
     """An XLSX with every clock pinned, written through a deterministic re-zip."""
     workbook = Workbook()
-    worksheet = workbook.active
-    worksheet.title = sheet
+    # `Workbook.active` is a chartsheet-or-worksheet-or-None as far as the type checker is
+    # concerned. Dropping the default sheet and creating one explicitly gives a worksheet that is
+    # a worksheet statically as well as at runtime, which costs one line and removes three casts.
+    workbook.remove(workbook.worksheets[0])
+    worksheet = workbook.create_sheet(title=sheet)
     worksheet.append(list(headers))
     for row in rows:
         worksheet.append(list(row))
@@ -340,12 +350,19 @@ def write_xlsx(
 
 
 def _stable_zip(raw: bytes) -> bytes:
-    """Rewrite an archive with a fixed entry timestamp, order and mode.
+    """Rewrite an archive with a fixed entry timestamp, order and mode, and a pinned modified date.
 
-    openpyxl builds the workbook correctly and stamps every entry with `time.localtime()`, so two
-    runs a second apart differ in bytes while being identical in content. Sorting the names as well
-    removes the other source of drift, since dictionary iteration order is only stable within one
-    interpreter version.
+    Two clocks have to be stopped, and the second one only shows up if you look.
+
+    :mod:`zipfile` stamps every entry with `time.localtime()`, so two runs a second apart differ in
+    bytes while being identical in content. Sorting the names removes the other archive-level drift,
+    since the order openpyxl adds members in is not guaranteed across versions.
+
+    And openpyxl **overwrites** `properties.modified` with `datetime.now()` inside `save_workbook`,
+    after the caller has set it — so pinning it before the save has no effect at all and the
+    workbook still carries the wall clock in `docProps/core.xml`. That was measured, not assumed:
+    two builds a second apart differed in exactly that element and nowhere else. Rewriting it here,
+    on the finished archive, is the only place the value stays put.
     """
     out = io.BytesIO()
     with (
@@ -356,8 +373,18 @@ def _stable_zip(raw: bytes) -> bytes:
             info = zipfile.ZipInfo(name, date_time=_ZIP_EPOCH)
             info.compress_type = zipfile.ZIP_DEFLATED
             info.external_attr = 0o600 << 16
-            target.writestr(info, source.read(name))
+            content = source.read(name)
+            if name == _CORE_PROPERTIES:
+                content = _pin_modified(content)
+            target.writestr(info, content)
     return out.getvalue()
+
+
+def _pin_modified(core_xml: bytes) -> bytes:
+    """Replace the workbook's modified timestamp with the declared constant."""
+    stamp = _DOC_TIMESTAMP.strftime("%Y-%m-%dT%H:%M:%SZ")
+    replacement = f'<dcterms:modified xsi:type="dcterms:W3CDTF">{stamp}</dcterms:modified>'
+    return _MODIFIED.sub(replacement, core_xml.decode("utf-8")).encode("utf-8")
 
 
 def write_json(path: Path, payload: object) -> None:

@@ -93,10 +93,10 @@ variable "private_endpoints_enabled" {
 
 variable "network" {
   type = object({
-    address_space            = string
-    infrastructure_subnet    = string
-    postgres_subnet          = string
-    private_endpoint_subnet  = string
+    address_space           = string
+    infrastructure_subnet   = string
+    postgres_subnet         = string
+    private_endpoint_subnet = string
   })
   default     = null
   description = <<-EOT
@@ -192,12 +192,12 @@ variable "container_image" {
 
 variable "blob_retention" {
   type = object({
-    raw_tier_to_cool_days       = number
-    raw_tier_to_archive_days    = number
+    raw_tier_to_cool_days        = number
+    raw_tier_to_archive_days     = number
     quarantine_tier_to_cool_days = number
-    quarantine_delete_days      = number
-    replay_tier_to_cool_days    = number
-    replay_delete_days          = number
+    quarantine_delete_days       = number
+    replay_tier_to_cool_days     = number
+    replay_delete_days           = number
   })
   description = <<-EOT
     Blob lifecycle thresholds in days.

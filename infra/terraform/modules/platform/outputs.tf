@@ -82,9 +82,9 @@ output "residency" {
         declared_region = azurerm_resource_group.this.location
       }
       storage_account = {
-        declared_region    = azurerm_storage_account.this.location
-        containers         = sort(keys(local.blob_containers))
-        versioning_enabled = true
+        declared_region     = azurerm_storage_account.this.location
+        containers          = sort(keys(local.blob_containers))
+        versioning_enabled  = true
         shared_keys_enabled = false
       }
       database = {

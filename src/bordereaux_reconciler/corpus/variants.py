@@ -735,7 +735,7 @@ VARIANTS: Final[tuple[VariantSpec, ...]] = (
             ("Value Date", "attributes.settlement_date", _date("settlement_date")),
             ("Consideration Gross", "gross", GROSS),
             ("Platform Charge", "deductions.fee", FEE),
-            ("Disbursement", "net", NET),
+            ("Balance Transferred", "net", NET),
         ),
         perturbations=(
             "unseen_vocabulary",

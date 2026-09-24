@@ -25,10 +25,12 @@ resource "azurerm_container_app_environment" "this" {
   log_analytics_workspace_id = azurerm_log_analytics_workspace.this.id
   logs_destination           = "log-analytics"
 
-  # Set only when workload profiles are in play. A Consumption-only environment deliberately has no
-  # subnet: injecting one costs a /23 of address space and buys nothing until something needs a
-  # dedicated profile.
-  infrastructure_subnet_id = length(var.container_app_workload_profiles) > 0 ? azurerm_subnet.infrastructure[0].id : null
+  # Injected whenever the environment has a VNet at all, not only when it has workload profiles.
+  # Workload profiles are one reason to need injection; private endpoints are the other, and they
+  # are the one that is easy to get wrong — an environment behind private endpoints whose apps sit
+  # outside the VNet cannot resolve or reach the storage account it is supposed to be protecting,
+  # and the symptom is a timeout rather than a permission error.
+  infrastructure_subnet_id = var.network != null ? azurerm_subnet.infrastructure[0].id : null
 
   dynamic "workload_profile" {
     for_each = { for profile in var.container_app_workload_profiles : profile.name => profile }
@@ -120,10 +122,10 @@ resource "azurerm_container_app" "api" {
       }
 
       liveness_probe {
-        transport      = "HTTP"
-        port           = 8000
-        path           = "/healthz"
-        initial_delay  = 10
+        transport     = "HTTP"
+        port          = 8000
+        path          = "/healthz"
+        initial_delay = 10
       }
     }
 

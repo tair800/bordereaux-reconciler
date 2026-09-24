@@ -24,9 +24,9 @@ check "declared_jurisdiction_is_consistent" {
 
 output "residency" {
   value = {
-    topology    = "hosted_api"
-    provisioned = false
-    provider    = var.provider_label
+    topology      = "hosted_api"
+    provisioned   = false
+    provider      = var.provider_label
     endpoint_host = var.endpoint_host
 
     declared_region    = var.declared_region
