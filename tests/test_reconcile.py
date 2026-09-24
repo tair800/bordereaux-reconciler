@@ -204,10 +204,7 @@ class TestMatchedIsReachableFromOnePlace:
 
     def test_reconcile_returns_matched_from_exactly_one_statement(self) -> None:
         source = (
-            Path(__file__).resolve().parents[1]
-            / "src"
-            / "bordereaux_reconciler"
-            / "reconcile.py"
+            Path(__file__).resolve().parents[1] / "src" / "bordereaux_reconciler" / "reconcile.py"
         ).read_text(encoding="utf-8")
 
         matched_sites = [
@@ -227,10 +224,7 @@ class TestMatchedIsReachableFromOnePlace:
     def test_reconcile_imports_neither_a_provider_nor_an_adapter(self) -> None:
         """The AI boundary, over the import graph rather than over a promise."""
         source = (
-            Path(__file__).resolve().parents[1]
-            / "src"
-            / "bordereaux_reconciler"
-            / "reconcile.py"
+            Path(__file__).resolve().parents[1] / "src" / "bordereaux_reconciler" / "reconcile.py"
         ).read_text(encoding="utf-8")
 
         imported = {

@@ -184,7 +184,9 @@ BREACHES: tuple[Breach, ...] = (
         path=SRC / "ingest" / "mapping.py",
         old="        return 1.0 - (1.0 - self.header_score) * (1.0 - self.shape_score)",
         new="        return self.header_score",
-        expect_failure_in=("tests/test_ingest.py::TestMapping::test_shape_beats_a_misleading_header",),
+        expect_failure_in=(
+            "tests/test_ingest.py::TestMapping::test_shape_beats_a_misleading_header",
+        ),
     ),
     Breach(
         identifier="no-abstention",
@@ -224,9 +226,7 @@ BREACHES: tuple[Breach, ...] = (
             evidence=Evidence(rule="shortcut", detail="too many fields to check"),
         )
     outside = [d for d in discrepancies if not d.within_tolerance]""",
-        expect_failure_in=(
-            "tests/test_reconcile.py::TestMatchedIsReachableFromOnePlace",
-        ),
+        expect_failure_in=("tests/test_reconcile.py::TestMatchedIsReachableFromOnePlace",),
     ),
     Breach(
         identifier="ai-reaches-reconciliation",

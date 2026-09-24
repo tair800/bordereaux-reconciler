@@ -70,9 +70,7 @@ def _row(key: str, gross: str, *, net: str | None = None) -> CanonicalRow:
         key=key,
         currency=GBP,
         period="2026-01",
-        gross=Tracked[Money](
-            value=Money(amount=Decimal(gross), currency=GBP), lineage=lineage
-        ),
+        gross=Tracked[Money](value=Money(amount=Decimal(gross), currency=GBP), lineage=lineage),
         net=(
             Tracked[Money](value=Money(amount=Decimal(net), currency=GBP), lineage=lineage)
             if net
@@ -151,9 +149,7 @@ class TestIdempotentIngestion:
         with engine.connect() as connection:
             events = [
                 r.event
-                for r in connection.execute(
-                    select(audit_event.c.event).order_by(audit_event.c.id)
-                )
+                for r in connection.execute(select(audit_event.c.event).order_by(audit_event.c.id))
             ]
         assert events == ["file_ingested", "ingest_skipped_duplicate"]
 
@@ -166,9 +162,7 @@ class TestIdempotentIngestion:
 
 
 class TestDuplicateKeysAreHeldNotWritten:
-    def test_a_repeated_key_goes_to_quarantine_instead_of_the_ledger(
-        self, engine: Engine
-    ) -> None:
+    def test_a_repeated_key_goes_to_quarantine_instead_of_the_ledger(self, engine: Engine) -> None:
         """The ledger is the accounting record, so it takes neither version of an ambiguous row."""
         rows = (_row("A", "1000.00"), _row("A", "1500.00"), _row("B", "2000.00"))
         result = _ingest(engine, "1" * 64, rows)
@@ -237,9 +231,7 @@ class TestAuditTrail:
             confirmed_by="j.okafor",
         )
         with engine.connect() as connection:
-            events = connection.execute(
-                select(audit_event.c.event, audit_event.c.actor)
-            ).all()
+            events = connection.execute(select(audit_event.c.event, audit_event.c.actor)).all()
         assert ("mapping_confirmed", "j.okafor") in [(e.event, e.actor) for e in events]
 
     def test_audit_events_accumulate(self, engine: Engine) -> None:

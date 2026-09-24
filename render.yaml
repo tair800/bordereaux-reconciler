@@ -1,0 +1,47 @@
+# A public, read-only demonstration on Render's free tier.
+#
+# Three things about this file are deliberate and are the reason it is short.
+#
+# **`BX_READ_ONLY` is true and `BX_APPROVER_TOKEN` is not set.** Both are required for a write, so
+# the public instance serves every screen and answers 403 to every approval, including for its
+# operator. Confirming a mapping decides how a coverholder's premium is read; that is not something
+# an anonymous visitor does, and a demo that allowed it would be demonstrating the wrong thing.
+#
+# **No model API key reaches this service.** No live inference arm is wired in this build at all,
+# so there is nothing here that could spend money on behalf of a visitor. A public endpoint in front
+# of a paid API is a bill waiting to be run up by the first person who finds it.
+#
+# **The free Postgres instance is seeded with the synthetic corpus and nothing else.** Every figure
+# the public console shows is generated from a committed seed, and the footer of every page says so.
+#
+# Deploy with the Render Blueprint flow; nothing here needs a payment method.
+
+services:
+  - type: web
+    name: bordereaux-reconciler
+    runtime: docker
+    plan: free
+    region: frankfurt
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      - key: BX_READ_ONLY
+        value: "true"
+      - key: BX_ENVIRONMENT
+        value: public-demo
+      - key: BX_DATABASE_URL
+        fromDatabase:
+          name: bordereaux-demo-db
+          property: connectionString
+      # Deliberately absent: BX_APPROVER_TOKEN. Its absence is what makes the write endpoints
+      # refuse, and adding it here would put the same credential on every deploy of this blueprint.
+
+databases:
+  - name: bordereaux-demo-db
+    plan: free
+    region: frankfurt
+    # The demo reads; it does not accept uploads from the public internet. The schema is created and
+    # seeded by a one-off job rather than by the web service, so the serving process never needs
+    # permission to create a table.
+    postgresMajorVersion: "16"

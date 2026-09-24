@@ -5,26 +5,33 @@ description = "Reconcile delegated-authority bordereaux against a carrier ledger
 requires-python = ">=3.12"
 dependencies = [
   "pydantic>=2.9",
-  "polars>=1.17",
   "fastapi>=0.115",
   "uvicorn[standard]>=0.32",
   "jinja2>=3.1",
-  "python-multipart>=0.0.12",
   "sqlalchemy>=2.0",
   "alembic>=1.14",
   "psycopg[binary]>=3.2",
   "rapidfuzz>=3.10",
-  "httpx>=0.27",
+  # A runtime dependency, not a dev one. `ingest/read.py` imports it to read XLSX, and while it sat
+  # in the dev group the shipped image could not open a spreadsheet at all — the corpus has XLSX
+  # variants, so this was not a hypothetical gap. Caught by listing what the built image actually
+  # contains rather than by reading the file that declares it.
+  "openpyxl>=3.1",
 ]
+
+# `polars` and `python-multipart` were declared here and imported nowhere. Polars alone is most of
+# a hundred megabytes in the image, and a dependency nothing uses is still one somebody has to patch
+# when it has a CVE. `httpx` moved to the dev group: Starlette's TestClient needs it, and the
+# service does not — which the test run said immediately when it was removed outright.
 
 [dependency-groups]
 dev = [
   "pytest>=8.3",
   "ruff>=0.8",
   "mypy>=1.13",
-  "playwright>=1.49",
-  "openpyxl>=3.1",
   "types-openpyxl>=3.1",
+  # Required by starlette.testclient. Test-only: nothing the service runs makes an HTTP request.
+  "httpx>=0.27",
 ]
 
 [build-system]

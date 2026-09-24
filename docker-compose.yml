@@ -39,5 +39,18 @@ services:
     ports:
       - "127.0.0.1:8060:8000"
 
+  migrate:
+    # A one-off, not a dependency of `app`. The serving process should not have permission to
+    # create a table, and a web service that migrates on boot gives every replica a chance to race
+    # every other one through the same DDL.
+    build: .
+    profiles: ["tools"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      BX_DATABASE_URL: postgresql+psycopg://bordereaux:bordereaux_local_only@postgres:5432/bordereaux
+    command: ["alembic", "upgrade", "head"]
+
 volumes:
   bordereaux_pgdata:

@@ -255,7 +255,7 @@ class TestLineage:
         """`38,867.16` with its separator, so a reader can find the same cell in the file."""
         path = tmp_path / "b.csv"
         path.write_text(
-            "Policy Reference,Period,Gross Premium\nPOL-202601-00001,2026-01,\"38,867.16\"\n",
+            'Policy Reference,Period,Gross Premium\nPOL-202601-00001,2026-01,"38,867.16"\n',
             encoding="utf-8",
         )
         grid = read_grid(path, sheet="Bordereau")
