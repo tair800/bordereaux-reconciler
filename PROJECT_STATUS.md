@@ -13,9 +13,9 @@ Everything in this section was produced by running a command, not by reading cod
 | | check | result |
 |---|---|---|
 | lint | `ruff check src tests scripts alembic` | clean |
-| format | `ruff format --check` | 48 files already formatted |
+| format | `ruff format --check` | 52 files already formatted |
 | types | `mypy --strict src` | clean, 32 source files |
-| tests | `pytest tests -q` | **171 passed** |
+| tests | `pytest tests -q` | **206 passed** |
 | kill criteria | `pytest tests/test_kill_criteria.py` | all pass against artifacts built this session |
 | falsifiability | `python scripts/plant_breaches.py` | **19/19 caught** |
 | corpus determinism | `generate_corpus.py --verify-determinism` | 2 builds, 37 files, byte-identical |
@@ -66,15 +66,15 @@ passing test.
 
 ## Blockers
 
-None for the scope as specified. Three things need something this build does not have:
+None. Two things remain unmeasured because they need something this build does not have, and both
+are reported as unmeasured rather than estimated:
 
 - **A live inference arm** needs an API key. The port, the validation boundary and the per-request
-  residency record are complete and tested; the HTTP call is what is missing, and no cost or latency
-  figure is published for an arm that has never been called.
-- **Applying the Terraform** needs an Azure subscription. All three environment roots validate;
-  nothing has been applied and `terraform output` has never run.
-- **The public deployment** needs the owner to connect the repository on Render. `render.yaml` is
-  committed and describes a free-tier, read-only service with no approver token and no model key.
+  residency record are complete and tested; the HTTP call is what is missing, and **no cost or
+  latency figure is published for an arm that has never been called**.
+- **Applying the Terraform** needs an Azure subscription. All three environment roots validate under
+  1.16.4 against the real azurerm 5.6.0 schema; nothing has been applied, there are zero `.tfstate`
+  files, and `terraform output` has never run.
 
 ---
 
