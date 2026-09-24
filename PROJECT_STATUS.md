@@ -1,9 +1,8 @@
 # PROJECT_STATUS
 
-**Milestone: feature-complete against the fast-track scope, evidence built and graded, hold-out
-scored once and frozen.**
+**Milestone: FULLY COMPLETE AND FROZEN. Deployed, publicly verified, read-only.**
 
-Last updated after the evidence build at commit `cd5c1b1` plus the packaging and migrations work.
+Live at <https://bordereaux-reconciler.onrender.com>. Last updated at commit `36df3a8`.
 
 ---
 
@@ -24,6 +23,9 @@ Everything in this section was produced by running a command, not by reading cod
 | terraform | `validate` in `envs/{dev,bench,prod}` under 1.16.4 | all three valid |
 | image | `docker build` then `curl /healthz` | 503 without a database, 200 with one, read-only |
 | console | six screens served locally | all 200; lineage renders 7 cells for one row |
+| **public deploy** | six screens over HTTPS | all 200; `/healthz` `read_only: true`, `writes_enabled: false` |
+| **read-only in public** | POST with no / guessed / empty token | **403** every time; ledger counters unchanged to the audit event |
+| **live money** | a held-out row's lineage | `2.768,84 GBP` read as `2768.8400`, less `276.88`, equals stored net `2491.9600` |
 
 ### The measured results
 
@@ -81,15 +83,18 @@ None for the scope as specified. Three things need something this build does not
 | | state |
 |---|---|
 | local | `docker compose up -d postgres` + `make console` → http://127.0.0.1:8061 |
-| image | builds; serves; answers `/healthz` with and without a database |
-| public demo | **not deployed.** `render.yaml` committed, free tier, read-only, no payment method required |
-| Azure | **not deployed.** Terraform validated, never applied, no subscription |
+| image | builds; serves; migrates and seeds a schema-less database; answers `/healthz` with and without one |
+| **public demo** | **LIVE** — <https://bordereaux-reconciler.onrender.com>, Render Free, Frankfurt, Docker, read-only, no approver token, no model key, no payment method |
+| **demo database** | Render Free PostgreSQL 16, Frankfurt. **Expires 24 October 2026**; `/evidence` survives it, the other screens will report an empty ledger |
+| Azure | **not deployed.** Terraform validated under 1.16.4 in all three roots, never applied, zero `.tfstate`, no subscription |
 
 ---
 
 ## Next
 
-1. Deploy the Render blueprint and record the URL in the README.
-2. An adapter that models split commission and a two-basis tax, which removes known issue 1.
-3. A live inference arm, when a key exists — and only then may a cost or latency figure appear
+1. An adapter that models split commission and a two-basis tax, which removes known issue 1.
+2. A live inference arm, when a key exists — and only then may a cost or latency figure appear
    anywhere.
+3. When the free database expires on 24 October 2026, either re-provision it or let the console
+   serve `/evidence` alone. Both are acceptable; what is not is leaving the README claiming a
+   working ledger that is no longer there.
