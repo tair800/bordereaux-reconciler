@@ -186,7 +186,10 @@
 
 {% if h %}
 <section class="panel" style="border-left:4px solid var(--warn)">
-  <strong>What the residency check does not prove.</strong>
+  {# A colon, not a full stop. `does_not_prove` is written to continue this sentence, and with a
+     full stop the panel read "does not prove. that any of this is deployed", which is the kind of
+     small wrongness that makes a careful reader distrust the careful numbers above it. #}
+  <strong>What the residency check does not prove:</strong>
   <p class="muted" style="margin:6px 0 0; max-width:74ch">{{ h.does_not_prove }}</p>
 </section>
 {% endif %}

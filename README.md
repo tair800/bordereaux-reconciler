@@ -17,13 +17,31 @@ deliberately injected discrepancies.** A reconciler that silently reports money 
 does not is worse than one that refuses to answer, and ADR-001 fixes that count at zero with no
 acceptable non-zero value.
 
-[![CI](https://github.com/tair800/bordereaux-reconciler/actions/workflows/ci.yml/badge.svg)](https://github.com/tair800/bordereaux-reconciler/actions/workflows/ci.yml)
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/tair800/bordereaux-reconciler)
+## Live demo — <https://bordereaux-reconciler.onrender.com>
 
-**Not currently deployed.** `render.yaml` is committed and describes a free-tier, read-only service
-with **no approver token and no model API key**, so the public instance would serve every screen and
-answer 403 to every write — including for its operator. Deploying it needs a Render account, which
-is the one thing in this repository that cannot be done from a checkout.
+[![CI](https://github.com/tair800/bordereaux-reconciler/actions/workflows/ci.yml/badge.svg)](https://github.com/tair800/bordereaux-reconciler/actions/workflows/ci.yml)
+
+Read-only, and not as a matter of policy: `BX_READ_ONLY` is true and **no approver token is
+configured**, and both are required for a write, so the single mutating route the service exposes
+answers 403 to everybody including its operator. **No model API key reaches it**, because no live
+inference arm is wired in this build at all — there is nothing there that could spend money on
+behalf of a visitor.
+
+Two honest caveats about a free tier. The instance **sleeps after fifteen minutes** of inactivity,
+so the first request after a quiet spell takes the better part of a minute; it is waking, not
+broken. And Render's free PostgreSQL **expires on 24 October 2026**, after which the database is
+deleted and the console will serve `/evidence` — which reads committed artifacts and needs no
+database — while the other screens report an empty ledger.
+
+| | |
+|---|---|
+| ![Overview](docs/screenshots/live/overview-light.png) | ![Evidence](docs/screenshots/live/evidence-light.png) |
+| **Overview** — the false-MATCHED banner renders whether the count is zero or not | **Evidence** — every figure traced to the artifact that produced it |
+| ![Row lineage](docs/screenshots/live/row-lineage-light.png) | ![Quarantine](docs/screenshots/live/quarantine-light.png) |
+| **Lineage** — every value traced to the cell it came from | **Quarantine** — a queue, not a bin |
+
+Captured from the deployment by `scripts/screenshots.py --base-url ...`. A dark set and a
+locally-reproducible set are in [`docs/screenshots/`](docs/screenshots/).
 
 ---
 
@@ -305,7 +323,10 @@ engineer with access, or of a lawful-access order served on a parent company.
 Recorded here so it cannot look like an omission discovered later. The full list with reasons is in
 [DECISIONS.md](DECISIONS.md).
 
-- **No deployed cloud infrastructure.** Terraform is written and validated; nothing is applied.
+- **No deployed Azure infrastructure.** Terraform is written and validated in CI against the real
+  azurerm 5.6.0 schema; `terraform apply` has never run and no Azure subscription exists for this
+  build. The live demo above runs on Render's free tier, which is a different thing and is labelled
+  as such everywhere.
 - **No live model call.** The port, the validation boundary and the per-request residency record are
   complete and tested. The HTTP call needs a key this build does not have, and stubbing it would
   produce numbers nobody measured.

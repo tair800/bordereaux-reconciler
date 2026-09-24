@@ -35,6 +35,8 @@ dev = [
   # `test_deployment.py` parses render.yaml. It resolves transitively today, and a test that
   # depends on a transitive dependency breaks the day an unrelated package drops it.
   "pyyaml>=6.0",
+  # `scripts/screenshots.py`. Dev-only: the service never drives a browser.
+  "playwright>=1.49",
 ]
 
 [build-system]
