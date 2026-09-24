@@ -67,7 +67,7 @@ _SYMBOLS: Final[dict[Currency, str]] = {
 #: Written as an escape rather than the character itself, so nobody has to trust that an invisible
 #: byte in this file is the one it claims to be. Excel puts this between a currency symbol and a
 #: figure, and a corpus without one would never exercise the parser path that handles it.
-_NBSP: Final = " "
+_NBSP: Final = "\u00a0"
 
 _MONTHS: Final = (
     "January",
