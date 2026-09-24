@@ -17,6 +17,14 @@ deliberately injected discrepancies.** A reconciler that silently reports money 
 does not is worse than one that refuses to answer, and ADR-001 fixes that count at zero with no
 acceptable non-zero value.
 
+[![CI](https://github.com/tair800/bordereaux-reconciler/actions/workflows/ci.yml/badge.svg)](https://github.com/tair800/bordereaux-reconciler/actions/workflows/ci.yml)
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/tair800/bordereaux-reconciler)
+
+**Not currently deployed.** `render.yaml` is committed and describes a free-tier, read-only service
+with **no approver token and no model API key**, so the public instance would serve every screen and
+answer 403 to every write — including for its operator. Deploying it needs a Render account, which
+is the one thing in this repository that cannot be done from a checkout.
+
 ---
 
 ## What it does
