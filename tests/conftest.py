@@ -1,6 +1,7 @@
 """Session-level guards for the predeclared kill test.
 
-`test_predeclaration.py` checks the kill test as **text**. Projects 4 and 5 learned the hard way that this
+`test_predeclaration.py` checks the kill test by **parsing** it. Projects 4 and 5 learned the
+hard way that neither is enough on its own: this
 is not enough: banning the literal string `importorskip` bans one spelling of one mechanism, and
 adding `pytest.mark.skip` left every text assertion green while zero kill tests ran. So the real
 guard is here, and it asks pytest what it is about to run instead of reading source.
