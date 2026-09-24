@@ -7,20 +7,25 @@ drift from it.
 
 from __future__ import annotations
 
-import os
 from logging.config import fileConfig
 
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
-from bordereaux_reconciler.store import DEFAULT_DATABASE_URL
+from bordereaux_reconciler.store import database_url
 from bordereaux_reconciler.store.schema import METADATA
 
 config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-config.set_main_option("sqlalchemy.url", os.environ.get("BX_DATABASE_URL", DEFAULT_DATABASE_URL))
+# `database_url()`, not `os.environ.get("BX_DATABASE_URL", ...)`. This read the variable itself and
+# it was the same defect twice: a hosting provider hands out `postgres://`, SQLAlchemy 2.0 refuses
+# it, and the application normalised it while the migration runner did not — so the service started
+# and the migrations it depends on could not. Found by running the real container against a real
+# empty database with the URL a provider actually emits, which is the only way that class of bug
+# shows up.
+config.set_main_option("sqlalchemy.url", database_url())
 
 target_metadata = METADATA
 

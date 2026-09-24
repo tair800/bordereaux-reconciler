@@ -1,0 +1,10 @@
+# Line endings that matter.
+#
+# `docker-entrypoint.sh` is the one that would actually break: a shell script checked out with CRLF
+# fails inside a Linux container with `bad interpreter: /bin/sh^M`, which is an obscure error to
+# meet for the first time in a deploy log. This machine has `core.autocrlf` active, so without this
+# the risk is real rather than theoretical.
+*.sh text eol=lf
+Dockerfile text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf

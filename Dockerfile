@@ -34,6 +34,19 @@ COPY --from=build --chown=root:root /app/.venv /app/.venv
 COPY --from=build --chown=root:root /app/src /app/src
 COPY --from=build --chown=root:root /app/scripts /app/scripts
 
+# The migrations. Without these the container can bring up its own schema only through
+# `create_all`, which is the test path — the deployed service must use the same migrations an
+# operator runs, or the thing that is deployed is not the thing that was tested.
+COPY --chown=root:root alembic.ini ./alembic.ini
+COPY --chown=root:root alembic ./alembic
+
+# The evidence. `/evidence` reads these eight files and nothing else, so it is the one screen that
+# works with no database at all — and it is the screen a reader should look at first. Leaving them
+# out would have deployed a console that reports "not measured" for every figure the README quotes.
+COPY --chown=root:root artifacts ./artifacts
+
+COPY --chown=root:root docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+
 ENV PATH="/app/.venv/bin:${PATH}" \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
@@ -46,7 +59,16 @@ EXPOSE 8000
 
 # Answers 200 with a database and 503 without one. Both are answers; a container that hung would
 # pass a build check and fail on first deploy.
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=4).status in (200, 503) else 1)"
+#
+# `--start-period=45s` rather than 10s: the entrypoint now waits for the database, migrates and
+# seeds before uvicorn binds, and a managed Postgres can take most of a minute to accept its first
+# connection. A start period shorter than the work it covers marks a healthy container unhealthy.
+#
+# `PORT` is read from the environment because the platform assigns it. Hard-coding 8000 here would
+# have the health check probe a port nothing is listening on, and the container would be killed and
+# restarted forever while serving correctly on the port it was told to use.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=45s --retries=3 \
+  CMD python -c "import os,urllib.request,sys; p=os.environ.get('PORT','8000'); sys.exit(0 if urllib.request.urlopen(f'http://127.0.0.1:{p}/healthz', timeout=4).status in (200, 503) else 1)"
 
-CMD ["uvicorn", "bordereaux_reconciler.api.app:app", "--host", "0.0.0.0", "--port", "8000"]
+# `PORT` because the platform assigns it; 8000 when nothing does.
+CMD ["/usr/local/bin/docker-entrypoint.sh"]
