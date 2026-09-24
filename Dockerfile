@@ -46,6 +46,12 @@ COPY --chown=root:root alembic ./alembic
 COPY --chown=root:root artifacts ./artifacts
 
 COPY --chown=root:root docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+# `chmod` explicitly rather than trusting the mode git recorded. The first deploy of this image
+# exited 128 for exactly this reason: the file was committed 100644 from a Windows checkout, the
+# local build worked because the working copy happened to carry the bit from a `chmod`, and the
+# platform — which checks out from git — got a script it could not execute. The git mode is now
+# 100755 as well, and a test asserts it; this line means the image is correct even when it is not.
+RUN chmod 0755 /usr/local/bin/docker-entrypoint.sh
 
 ENV PATH="/app/.venv/bin:${PATH}" \
     PYTHONUNBUFFERED=1 \

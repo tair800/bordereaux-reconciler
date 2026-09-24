@@ -136,6 +136,7 @@ dev = [
     { name = "httpx" },
     { name = "mypy" },
     { name = "pytest" },
+    { name = "pyyaml" },
     { name = "ruff" },
     { name = "types-openpyxl" },
 ]
@@ -158,6 +159,7 @@ dev = [
     { name = "httpx", specifier = ">=0.27" },
     { name = "mypy", specifier = ">=1.13" },
     { name = "pytest", specifier = ">=8.3" },
+    { name = "pyyaml", specifier = ">=6.0" },
     { name = "ruff", specifier = ">=0.8" },
     { name = "types-openpyxl", specifier = ">=3.1" },
 ]
