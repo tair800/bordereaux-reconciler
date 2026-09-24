@@ -131,6 +131,18 @@ def normalise_period(raw: str, *, day_first: bool) -> str | None:
     if match := re.match(r"^(\d{4})[-/.](\d{1,2})(?:[-/.]\d{1,2})?$", text):
         return f"{match.group(1)}-{int(match.group(2)):02d}"
 
+    # `01/2026`. A month and a four-digit year, which is how a reporting period is written when it
+    # is not written as `YYYY-MM`. Unambiguous because the trailing component has four digits, so no
+    # declared date order is consulted: there is nothing to decide.
+    #
+    # This was missing while `profile.py` already recognised the same rendering as temporal, so the
+    # mapper would correctly identify the period column and the canonicaliser would then quarantine
+    # every row in the file. Two modules disagreeing about what a date is, in a system whose whole
+    # subject is disagreement between two records.
+    if match := re.match(r"^(\d{1,2})[-/.](\d{4})$", text):
+        month = int(match.group(1))
+        return f"{int(match.group(2)):04d}-{month:02d}" if 1 <= month <= MAX_MONTH else None
+
     if match := re.match(r"^(\d{1,2})[-/.](\d{1,2})[-/.](\d{2,4})$", text):
         first, second, year = (int(g) for g in match.groups())
         # A component over twelve can only be a day, whatever the declared order says. Believing

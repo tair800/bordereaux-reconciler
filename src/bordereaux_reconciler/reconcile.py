@@ -177,10 +177,8 @@ def _reconcile_pair(
                     detail=(
                         f"the {side} row does not agree with itself: net "
                         f"{row.net.value if row.net else '-'} against gross minus "
-                        f"deductions {row.net_of_deductions()}. Comparing a "
-                        f"against gross minus deductions {row.net_of_deductions()}. Comparing a "
-                        "figure that is already known to be wrong would produce a confident answer "
-                        "about the wrong number."
+                        f"deductions {row.net_of_deductions()}. Comparing a figure that is already "
+                        "known to be wrong would produce a confident answer about the wrong number."
                     ),
                 ),
             )

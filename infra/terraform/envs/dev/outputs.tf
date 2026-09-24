@@ -11,9 +11,15 @@ output "residency_manifest" {
   value = {
     schema_version = 1
     environment    = local.environment
-    statement      = file("${path.module}/../../residency_statement.md")
-    platform       = module.platform.residency
-    inference      = local.inference_residency
+    # Normalised rather than read raw: a CRLF checkout on Windows would otherwise make this
+    # field differ from the committed manifest byte for byte while saying the same thing, and
+    # kill condition H would fire on a line ending. scripts/residency_manifest.py normalises
+    # identically.
+    statement = trimspace(
+      replace(file("${path.module}/../../residency_statement.md"), "\r\n", "\n")
+    )
+    platform  = module.platform.residency
+    inference = local.inference_residency
   }
 }
 

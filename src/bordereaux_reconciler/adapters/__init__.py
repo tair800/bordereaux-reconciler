@@ -76,6 +76,10 @@ class Shape(BaseModel):
     pattern: str | None = None
     #: Fraction drawn from a small closed vocabulary — a categorical column.
     categorical: bool | None = None
+    #: One value, or a handful, for the whole file. True for a reporting period, false for a date
+    #: that varies per row. The two are both temporal and both categorical-ish, and this is the only
+    #: declared shape that tells them apart when the headers are unfamiliar.
+    near_constant: bool | None = None
     #: Rough rank among the money columns by magnitude: 0 is the largest. Gross is almost always 0.
     magnitude_rank: int | None = None
 

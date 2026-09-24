@@ -1,0 +1,92 @@
+{
+  "applied": false,
+  "authoritative_producer": "terraform output -json residency_manifest",
+  "generated_by": "scripts/residency_manifest.py, from committed Terraform inputs",
+  "manifest": {
+    "environment": "bench",
+    "inference": {
+      "azure_openai": {
+        "country_iso": "SE",
+        "declared_region": "swedencentral",
+        "geography": "Sweden",
+        "model": "gpt-4o-mini:2024-07-18",
+        "processing_scope": "DataZoneStandard",
+        "provisioned": true,
+        "residency_boundary": "EU/EEA",
+        "topology": "azure_openai"
+      },
+      "hosted_api": {
+        "country_iso": "US",
+        "declaration_source": "vendor DPA, sub-processor annex; not verified by this configuration",
+        "declared_region": "us-east",
+        "endpoint_host": "api.hosted-llm-vendor.invalid",
+        "key_vault_secret_name": "hosted-api-key",
+        "provider": "hosted-api-us",
+        "provisioned": false,
+        "region_table_used": false,
+        "residency_boundary": "US",
+        "topology": "hosted_api",
+        "verified_by_terraform": false
+      },
+      "selfhost_gpu": {
+        "country_iso": "SE",
+        "declared_region": "swedencentral",
+        "geography": "Sweden",
+        "model": "Qwen2.5-7B-Instruct",
+        "processing_scope": "single-region",
+        "provisioned": true,
+        "residency_boundary": "EU/EEA",
+        "topology": "selfhost_gpu"
+      }
+    },
+    "platform": {
+      "diagnostic_settings": [
+        "blob",
+        "containerappenv",
+        "keyvault",
+        "postgres",
+        "registry",
+        "storage"
+      ],
+      "private_endpoints_enabled": false,
+      "region": "swedencentral",
+      "region_facts": {
+        "country_iso": "SE",
+        "display_name": "Sweden Central",
+        "geography": "Sweden",
+        "residency_boundary": "EU/EEA"
+      },
+      "resources": {
+        "container_app_environment": {
+          "declared_region": "swedencentral"
+        },
+        "database": {
+          "declared_region": "swedencentral",
+          "password_auth_enabled": false
+        },
+        "key_vault": {
+          "declared_region": "swedencentral"
+        },
+        "log_analytics_workspace": {
+          "declared_region": "swedencentral"
+        },
+        "resource_group": {
+          "declared_region": "swedencentral"
+        },
+        "storage_account": {
+          "containers": [
+            "quarantine",
+            "raw-bordereaux",
+            "replay-snapshots"
+          ],
+          "declared_region": "swedencentral",
+          "shared_keys_enabled": false,
+          "versioning_enabled": true
+        }
+      }
+    },
+    "schema_version": 1,
+    "statement": "This manifest states where the resources of one environment are **declared** to live, and which\ninference topology is declared to process a model call in which place. It is generated from the\nTerraform configuration in `infra/terraform/`, and every environment root emits it as the\n`residency_manifest` output.\n\nIt is not a statement of legal or regulatory compliance. It does not assert that any listed\narrangement satisfies the GDPR, DORA, the EU AI Act, or any other instrument; it does not account\nfor the jurisdiction of the operator or of anyone with administrative access; and it does not\naddress lawful-access powers that reach a provider's parent company regardless of where a byte sits.\nThose are questions for a data protection officer and for counsel. This file is one input to that\nconversation, not a substitute for it.\n\n\"Declared\" is meant literally. Terraform sends a create request naming a region; Azure decides what\nto do with it. Nothing here is a measurement of where data physically came to rest, and no\nconfiguration file can make one. For the hosted-API topology even the declaration is second-hand \u2014\nit records what the provider states, names the document it was taken from, and marks itself as\nunverified."
+  },
+  "not_a_compliance_assertion": "this records where resources are declared to sit. It asserts no conformance with the GDPR, DORA, the EU AI Act or any other instrument; it does not account for the jurisdiction of the operator or of anyone with administrative access; and nothing described here has been deployed"
+}

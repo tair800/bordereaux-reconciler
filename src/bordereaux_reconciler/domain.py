@@ -24,7 +24,6 @@ from __future__ import annotations
 
 import enum
 import hashlib
-from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -312,7 +311,12 @@ class MappingContract(_Frozen):
 
     coverholder: str
     version: int = Field(ge=1)
-    family: Literal["insurance", "marketplace"]
+    # A plain string, not `Literal["insurance", "marketplace"]`. It was the latter, and kill
+    # condition G caught it: pinning the families here means a third adapter pack cannot be
+    # added without editing the engine's own domain model, which is the precise thing claim 2
+    # says is not true. The value is checked against the adapter registry at the boundary that
+    # knows what adapters exist; this module deliberately does not.
+    family: str = Field(min_length=1)
     #: source header -> canonical field.
     columns: dict[str, str]
     confirmed_by: str

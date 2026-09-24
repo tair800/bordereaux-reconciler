@@ -20,10 +20,10 @@ from typing import Any
 
 import pytest
 
-pytest.importorskip(
-    "bordereaux_reconciler.reconcile",
-    reason="predeclared before implementation; remove this skip once the package exists",
-)
+# The `pytest.importorskip` that stood here is gone, and its removal is enforced rather than
+# remembered: `test_predeclaration.py` fails the build if any skipping construct survives in this
+# file once `bordereaux_reconciler` is importable. A predeclared test is allowed to skip while it
+# has nothing to grade; the moment it does, a skip would make it decoration.
 
 ROOT = Path(__file__).resolve().parents[1]
 ARTIFACTS = ROOT / "artifacts"

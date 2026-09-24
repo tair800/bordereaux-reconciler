@@ -1,0 +1,32 @@
+{
+  "detail": [
+    {
+      "abstained": true,
+      "missing_required": [
+        "policy_reference",
+        "period"
+      ],
+      "reason": "no column could be mapped to required field(s) policy_reference, period",
+      "variant_id": "ins_12_unmappable_pivot"
+    },
+    {
+      "abstained": true,
+      "missing_required": [
+        "period"
+      ],
+      "reason": "no column could be mapped to required field(s) period",
+      "variant_id": "mkt_06_unmappable_positional"
+    }
+  ],
+  "kill_condition": "F",
+  "ledger_rows_written_for_unmappable": 0,
+  "method": "abstention is triggered by a required canonical field having no column assigned to it, not by a confidence score falling below a number \u2014 a threshold is something that can be lowered, and a missing required field is not",
+  "provenance": {
+    "commit": "9a9bb3edfaef87fedb53d1169b0bd62c00fa3ae3",
+    "is_synthetic_corpus": true,
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.12.13"
+  },
+  "quarantined": 2,
+  "unmappable_fixtures": 2
+}

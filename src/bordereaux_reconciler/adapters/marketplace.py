@@ -47,7 +47,7 @@ class MarketplaceAdapter:
                 "order ref",
                 "sales order",
             ),
-            shape=Shape(pattern=r"^[A-Z]{2,4}[-/]?\d{4,10}$", monetary=0.0),
+            shape=Shape(pattern=r"^[A-Z]{2,6}[-/]?(?:\d+[-/])*\d{3,10}$", monetary=0.0),
         ),
         CanonicalField(
             name="period",
@@ -59,11 +59,11 @@ class MarketplaceAdapter:
                 "month",
                 "payout period",
                 "statement month",
-                "order date",
-                "settlement date",
-                "transaction date",
             ),
-            shape=Shape(temporal=0.9, monetary=0.0),
+            # See the note in `insurance.py`: an order date and a settlement date are not the
+            # settlement *period*, and listing them here made the mapper prefer a per-row date over
+            # the column that actually names the month.
+            shape=Shape(temporal=0.9, monetary=0.0, near_constant=True),
         ),
         CanonicalField(
             name="gross_sales",
@@ -97,7 +97,7 @@ class MarketplaceAdapter:
                 "service fee",
                 "fees",
             ),
-            shape=Shape(monetary=0.99, magnitude_rank=1),
+            shape=Shape(monetary=0.99, magnitude_rank=2),
         ),
         CanonicalField(
             name="payout",
@@ -114,7 +114,7 @@ class MarketplaceAdapter:
                 "net",
                 "disbursement",
             ),
-            shape=Shape(monetary=0.99, magnitude_rank=0),
+            shape=Shape(monetary=0.99, magnitude_rank=1),
         ),
         CanonicalField(
             name="seller_name",

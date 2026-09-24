@@ -1,0 +1,136 @@
+{
+  "engine": "postgresql+psycopg://bordereaux:***@127.0.0.1:15437/bordereaux",
+  "files": 16,
+  "files_with_more_than_one_canonical_version": 0,
+  "ingestions_per_file": 3,
+  "kill_condition": "B",
+  "ledger_rows_changed_after_first_ingestion": 0,
+  "method": "each file is ingested three times through the same writer the service uses; the content hash is the primary key of ingested_file, so the second and third attempts are refused by the database rather than skipped by a check the caller could forget",
+  "per_file": [
+    {
+      "content_hash": "cb6c33296bd2270e7010f6838773f65dd9fb666a57c3c784065001721a0b920f",
+      "rows_written_first_time": 150,
+      "stored_rows": 150,
+      "variant_id": "ins_01_canonical_gbp",
+      "writes_after_the_first": 0
+    },
+    {
+      "content_hash": "eb41e710085921b377db92ea042d5e5b92d5d47285a111b700b6b42768c704c5",
+      "rows_written_first_time": 140,
+      "stored_rows": 140,
+      "variant_id": "ins_02_legacy_names_eur",
+      "writes_after_the_first": 0
+    },
+    {
+      "content_hash": "c7ad9ff3aa5a9b17634414814ce29e291b96ea06644c5fb7e10c6222f4d46757",
+      "rows_written_first_time": 145,
+      "stored_rows": 145,
+      "variant_id": "ins_03_abbreviated_reordered",
+      "writes_after_the_first": 0
+    },
+    {
+      "content_hash": "ddbcc2d9004c3794e41cbd2106ebcd31520cbbc2e735b6eca09ac833a788aa0d",
+      "rows_written_first_time": 150,
+      "stored_rows": 150,
+      "variant_id": "ins_04_split_commission_usd",
+      "writes_after_the_first": 0
+    },
+    {
+      "content_hash": "64ee9cd81244e8d3a407b31aed11f436ca534130508dce08f08179bde8758699",
+      "rows_written_first_time": 140,
+      "stored_rows": 140,
+      "variant_id": "ins_05_tax_basis_ambiguous",
+      "writes_after_the_first": 0
+    },
+    {
+      "content_hash": "633021846f15bc39bef1bf99e9d815071db8054969dcf0159e4ed3977cfbb147",
+      "rows_written_first_time": 135,
+      "stored_rows": 135,
+      "variant_id": "ins_06_swapped_gross_net",
+      "writes_after_the_first": 0
+    },
+    {
+      "content_hash": "6ea6b70f5b62c5fcbe4aa06c3a551dd932c2f4c3bb8edcad2c9c1d451c506ed4",
+      "rows_written_first_time": 159,
+      "stored_rows": 159,
+      "variant_id": "ins_07_duplicates_and_conflicts",
+      "writes_after_the_first": 0
+    },
+    {
+      "content_hash": "da5a86a479434b601237fdb5c4c9b9a1d5b049dbb786733f1de9d7a128916791",
+      "rows_written_first_time": 150,
+      "stored_rows": 150,
+      "variant_id": "ins_08_total_footer_disagrees",
+      "writes_after_the_first": 0
+    },
+    {
+      "content_hash": "4ccfef58ea9bbff2148c191d97b6f15143946e1fa611f9081b0ae14774d5e0a0",
+      "rows_written_first_time": 150,
+      "stored_rows": 150,
+      "variant_id": "ins_09_total_agrees_rows_transposed",
+      "writes_after_the_first": 0
+    },
+    {
+      "content_hash": "af6fad293e979a9246a8270919c629305470b561ec9401b569e0f347f1652874",
+      "rows_written_first_time": 145,
+      "stored_rows": 145,
+      "variant_id": "ins_10_localised_dates_nbsp",
+      "writes_after_the_first": 0
+    },
+    {
+      "content_hash": "c930418d5e03cc109fb11a1cc00b90b671a1a97f2fd98ace83b2918fc817e811",
+      "rows_written_first_time": 140,
+      "stored_rows": 140,
+      "variant_id": "ins_11_unseen_vocabulary",
+      "writes_after_the_first": 0
+    },
+    {
+      "content_hash": "28da17c9fd7ee6000a976a84ee548c82ceb5537faa019f20a8c43afc3d30b874",
+      "rows_written_first_time": 150,
+      "stored_rows": 150,
+      "variant_id": "mkt_01_canonical_usd",
+      "writes_after_the_first": 0
+    },
+    {
+      "content_hash": "157262d2a590d022a81b53f42f11efd89e78eea42053d5d8d637d5d3e57afaea",
+      "rows_written_first_time": 140,
+      "stored_rows": 140,
+      "variant_id": "mkt_02_abbreviated_eur",
+      "writes_after_the_first": 0
+    },
+    {
+      "content_hash": "f51e8742516b641f419ff85f7909970d8e2d5534ac2d1ea7ae19415bf6aab47d",
+      "rows_written_first_time": 145,
+      "stored_rows": 145,
+      "variant_id": "mkt_03_no_net_column",
+      "writes_after_the_first": 0
+    },
+    {
+      "content_hash": "a1b44956a035ff00aad0ccd44abde04b3682c5f0fa55a3985c1841e0aa040929",
+      "rows_written_first_time": 150,
+      "stored_rows": 150,
+      "variant_id": "mkt_04_legacy_reordered_refunds",
+      "writes_after_the_first": 0
+    },
+    {
+      "content_hash": "c2108d3c8fd187d158094a8c26433cb867aa9ea663d760e04835d8c75034c6df",
+      "rows_written_first_time": 140,
+      "stored_rows": 140,
+      "variant_id": "mkt_05_unseen_vocabulary",
+      "writes_after_the_first": 0
+    }
+  ],
+  "provenance": {
+    "commit": "9a9bb3edfaef87fedb53d1169b0bd62c00fa3ae3",
+    "is_synthetic_corpus": true,
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.12.13"
+  },
+  "table_counts": {
+    "audit_event": 48,
+    "ingested_file": 16,
+    "ledger_row": 2329,
+    "mapping_contract": 0,
+    "quarantine": 4
+  }
+}

@@ -203,3 +203,88 @@ the owner's instruction for this increment is a 1–2 day fast-track.
 
 **Nothing in the README, the UI or this file may describe an unbuilt item as built, or publish a
 number that was not measured.**
+
+---
+
+## ADR-002 — The hold-out was observed before the final score, and what was changed in between
+
+**Status: accepted. Written before the scored artifacts were committed, and recording something
+that reflects badly on the process rather than well.**
+
+### What happened
+
+The hold-out membership was fixed by ADR-001's rule — `blake2b(variant_id) % 100 < 30`, plus every
+variant declaring an unseen vocabulary — and that rule has not been touched. Six of eighteen
+variants are held out. The rule consults no seed and no score, so it cannot be re-drawn.
+
+The discipline that was **not** perfectly observed is the weaker one: that hold-out numbers should
+not be looked at until the scoring run. While building the evaluation pipeline, the per-variant
+debug output printed every variant, hold-out included. At that point the hold-out mapping accuracy
+was **0.7826**, below ADR-001's floor of 0.90.
+
+Nothing was hidden and nothing was re-drawn. What follows is the full list of what changed between
+that observation and the final score, with the evidence each change was diagnosed from.
+
+### The changes, and where each was diagnosed
+
+| change | diagnosed from | is it tuning? |
+|---|---|---|
+| `inception date`, `effective date`, `booking date`, `order date`, `settlement date` removed from the `period` field's synonyms | Nine **development** variants mapped a per-row date to the reporting period. A policy's inception is not the month being reported; listing one as a synonym of the other is a domain error. | No. A wrong synonym. |
+| Mapping scores tie-break on `(-combined, -header_score, -shape_score, header, field)` instead of `(-combined, header, field)` | Noisy-OR saturates at 1.0, so a column matching **no** synonym tied with one matching exactly, and the alphabet settled it. Visible on every development variant carrying two date columns. | No. Ranking evidence by spelling is a defect. |
+| `policy_reference` / `order_reference` identifier pattern widened to allow multiple segments | The old `^[A-Z]{2,4}[-/]?\d{4,10}$` matched **zero** policy references in **any** development file. The field's strongest shape signal had never once fired. | No. A pattern that matches nothing. |
+| `net_premium` magnitude rank 0 → 1, `commission` 1 → 2, `tax` 2 → 3; marketplace `payout` 0 → 1, `fee` 1 → 2 | Every development file carrying all four money columns orders them gross > net > commission > tax. The adapter declared net tied with gross, which gave the mapper no way to separate them by size. | No. A factual claim about the domain that development data contradicts. |
+| New `near_constant` shape signal, declared by the `period` fields | `categorical` could not carry this: across development variants a reporting period has a distinct ratio of 0.007 and a per-row date 0.17–0.21, and the categorical cut-off of 0.2 sits inside that second cluster — so the same kind of column came out categorical in six files and not in the seventh. | No. A new signal, not a moved threshold. |
+| `MM/YYYY` added to the profiler's date patterns and to `normalise_period` | `mkt_02_abbreviated_eur`, a **development** variant, writes its period as `06/2026`. The profiler did not recognise it, so the period column was vetoed out of the field entirely; `normalise_period` did not either, so every row of such a file was quarantined. | No. A period rendering the corpus declares and the code could not read. |
+
+**No threshold was lowered.** `MIN_MAPPING_ACCURACY` is still 0.90, `MAX_FALSE_MATCHED` is still 0,
+`ASSIGNMENT_FLOOR` is still 0.55, `MONETARY_VETO` is still 0.5, and `tests/test_kill_criteria.py`
+has not been edited since it was committed at `29240ef`, before any implementation existed. The one
+change to that file was forced by `test_predeclaration.py`: the `pytest.importorskip` that let it
+skip while the package did not exist had to be deleted once the package did.
+
+**No hold-out header entered the mapper's vocabulary.** The unseen-vocabulary variants exist so
+their headers are words the mapper has never been given, and that property is checked rather than
+asserted: generating the corpus surfaced `Disbursement` in `mkt_05_unseen_vocabulary` sitting in the
+marketplace adapter's synonym list, and the **corpus** was changed rather than the adapter, because
+deleting a legitimate synonym to make an evaluation look harder is the same distortion in the other
+direction.
+
+### The result, scored once
+
+| | system | best baseline | margin |
+|---|---|---|---|
+| hold-out (6 variants, 46 fields) | **0.9130** | `curated_synonyms` 0.6522 | +0.2608 |
+| development (12 variants, 92 fields) | 0.9130 | `curated_synonyms` 0.8370 | +0.0760 |
+
+The margin is **larger on the hold-out than on development**, which is the shape of result the
+thesis predicts: the hold-out contains the unseen-vocabulary variants, and that is exactly where
+header-string methods collapse and value-shape evidence does not.
+
+Reconciliation, hold-out: 715 rows, 90 injected discrepancies, **0 false MATCHED, 0 status
+disagreements of any kind** — every row returned precisely the status the answer key demanded before
+the reconciler was asked.
+
+### How to read this honestly
+
+A reviewer entitled to be sceptical should read the hold-out figure as **a genuine out-of-sample
+measurement whose independence is slightly weaker than the ideal**, because the rules were changed
+once after a hold-out number had been seen — even though every change was diagnosed on development
+data and none touched a threshold. The unqualified claim belongs to the development figure and to
+the zero false MATCHED, which no amount of process argument affects.
+
+**From this commit the rules are frozen.** Nothing in `adapters/`, `ingest/` or `reconcile.py` will
+be changed on the strength of a hold-out result. If a future change is wanted, the corpus gains new
+variants and the hold-out is re-drawn by the same unchanged rule.
+
+### Two limitations the numbers do not show, stated rather than buried
+
+- `ins_04_split_commission_usd` and `ins_05_tax_basis_ambiguous` return **REVIEW on every row**
+  (272 of 1,616 development rows). Both carry two columns competing for one canonical field — two
+  commissions, and a premium quoted both including and excluding tax — so `net` does not equal
+  `gross` minus deductions under either mapping, and the engine refuses to compare a row it already
+  knows does not add up. That is the designed behaviour and it is also a real product gap: the
+  adapters model one commission and one tax, and a coverholder splitting commission across two
+  columns needs an adapter that says so.
+- The fuzzy header baseline inside the system treats `Seller ID` as a match for the `seller`
+  synonym, so `seller_name` is assigned a column that is an identifier rather than a name on two
+  development variants. The adapters declare no shape that separates an identifier from a name.

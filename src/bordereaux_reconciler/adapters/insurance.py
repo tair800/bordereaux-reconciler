@@ -47,7 +47,12 @@ class InsuranceAdapter:
                 "pol ref",
                 "policy id",
             ),
-            shape=Shape(pattern=r"^[A-Z]{2,4}[-/]?\d{4,10}$", monetary=0.0),
+            # This was `^[A-Z]{2,4}[-/]?\d{4,10}$` and it matched **no** policy reference in any
+            # development file: `POL-202602-00001` has two separators and the pattern allowed one,
+            # so the strongest piece of shape evidence this field has was dead on every insurance
+            # layout. Real references are segmented — `CERT/2026/00042`, `POL-202602-00001` — and a
+            # pattern that only accepts one segment is describing a reference format nobody uses.
+            shape=Shape(pattern=r"^[A-Z]{2,6}[-/]?(?:\d+[-/])*\d{3,10}$", monetary=0.0),
         ),
         CanonicalField(
             name="period",
@@ -59,12 +64,17 @@ class InsuranceAdapter:
                 "month",
                 "bordereau month",
                 "statement period",
-                "inception date",
-                "effective date",
-                "transaction date",
-                "booking date",
             ),
-            shape=Shape(temporal=0.9, monetary=0.0),
+            # `inception date`, `effective date` and `booking date` were here and were wrong. A
+            # policy's inception is when cover starts; the period is the month being reported. They
+            # are different columns in the same file, and listing one as a synonym of the other made
+            # every layout carrying both map the wrong one — the header matched exactly, so no
+            # amount of shape evidence could outvote it.
+            #
+            # `categorical=True` is the shape that separates them without relying on the header at
+            # all: a reporting period takes one value for the whole file, an inception date takes a
+            # different value on nearly every row.
+            shape=Shape(temporal=0.9, monetary=0.0, near_constant=True),
         ),
         CanonicalField(
             name="gross_premium",
@@ -100,7 +110,10 @@ class InsuranceAdapter:
                 "govt levy",
                 "government levy",
             ),
-            shape=Shape(monetary=0.99, magnitude_rank=2),
+            # Rank 3, not 2. In every development file carrying all four money columns the order
+            # by size is gross, net, commission, tax — IPT is a statutory percentage of premium and
+            # commission a larger contractual share, so tax is the smallest of the four.
+            shape=Shape(monetary=0.99, magnitude_rank=3),
         ),
         CanonicalField(
             name="commission",
@@ -117,7 +130,7 @@ class InsuranceAdapter:
                 "coverholder commission",
                 "acquisition cost",
             ),
-            shape=Shape(monetary=0.99, magnitude_rank=1),
+            shape=Shape(monetary=0.99, magnitude_rank=2),
         ),
         CanonicalField(
             name="net_premium",
@@ -134,7 +147,11 @@ class InsuranceAdapter:
                 "net amount due",
                 "settlement amount",
             ),
-            shape=Shape(monetary=0.99, magnitude_rank=0),
+            # Rank 1, not 0. Net is gross less deductions, so it is never the largest money column
+            # in a file that also carries gross — declaring both at rank 0 gave the mapper no way to
+            # tell them apart by size, which is the one signal that still works when the headers are
+            # unfamiliar.
+            shape=Shape(monetary=0.99, magnitude_rank=1),
         ),
         CanonicalField(
             name="insured_name",

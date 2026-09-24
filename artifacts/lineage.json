@@ -1,0 +1,20 @@
+{
+  "cells_checked": 13718,
+  "cells_missing_lineage": 0,
+  "examples_missing": [],
+  "kill_condition": "C",
+  "method": "every Tracked value on every canonical row \u2014 gross, each deduction, net and each attribute \u2014 is inspected individually; a row is not sampled and a field is not assumed to inherit its neighbour's provenance",
+  "provenance": {
+    "commit": "9a9bb3edfaef87fedb53d1169b0bd62c00fa3ae3",
+    "is_synthetic_corpus": true,
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.12.13"
+  },
+  "required_fields": [
+    "source_content_hash",
+    "sheet",
+    "row",
+    "column",
+    "mapping_version"
+  ]
+}

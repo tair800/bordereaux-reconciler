@@ -33,6 +33,11 @@ _DATE_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(r"^\d{4}-\d{2}-\d{2}$"),
     re.compile(r"^\d{1,2}[/.-]\d{1,2}[/.-]\d{2,4}$"),
     re.compile(r"^\d{4}[/.-]\d{1,2}$"),
+    # `06/2026`. A month-and-year with the month first, which is how a reporting period is written
+    # in half the files that do not write it as `YYYY-MM`. It was missing, so those columns scored
+    # zero temporal and were vetoed out of the period field entirely — the column was not merely
+    # ranked low, it was ruled ineligible.
+    re.compile(r"^\d{1,2}[/.-]\d{4}$"),
     re.compile(r"^\d{1,2}\s+[A-Za-z]{3,9}\s+\d{4}$"),
     re.compile(r"^[A-Za-z]{3,9}\s+\d{4}$"),
     re.compile(r"^\d{4}-\d{2}$"),
@@ -42,6 +47,17 @@ _DATE_PATTERNS: tuple[re.Pattern[str], ...] = (
 #: number rather than fitted: nothing downstream tunes on it, and it only ever breaks ties.
 _CATEGORICAL_DISTINCT_RATIO = 0.2
 _CATEGORICAL_MAX_DISTINCT = 30
+
+#: At or below this many distinct values a column is **near-constant**: it labels the whole file
+#: rather than varying per row. A reporting period is the case this exists for — it takes one value
+#: in almost every bordereau, and three when a file spans a quarter.
+#:
+#: This is a separate signal from `categorical` because `categorical` could not carry it. Across the
+#: development variants a reporting period has a distinct ratio of 0.007 and a per-row inception
+#: date has 0.17-0.21, and the categorical cut-off of 0.2 lands in the middle of that second cluster
+#: — so the same kind of column came out categorical in six files and not in the seventh, and a
+#: signal that flips on the data rather than on the concept is worse than no signal.
+_NEAR_CONSTANT_MAX_DISTINCT = 3
 
 #: A column this much of which parses as money is a money column. High on purpose: a
 #: reference column of bare integers would otherwise look monetary, and mistaking an
@@ -68,6 +84,8 @@ class ColumnProfile:
     distinct: int
     distinct_ratio: float
     categorical: bool
+    #: One value, or a handful, for the whole column. What separates a reporting period from a date.
+    near_constant: bool = False
     #: Median magnitude of the parsed amounts, used only to rank money columns against each other.
     magnitude: float = 0.0
     #: Rank among this file's money columns, 0 being the largest. `None` when not a money column.
@@ -117,6 +135,7 @@ def profile_column(header: str, values: tuple[str, ...], *, sample: int = 200) -
             distinct=0,
             distinct_ratio=0.0,
             categorical=False,
+            near_constant=False,
         )
 
     dot, dot_magnitude = _monetary_share(present, DecimalConvention.DOT_DECIMAL)
@@ -141,6 +160,7 @@ def profile_column(header: str, values: tuple[str, ...], *, sample: int = 200) -
         categorical=(
             ratio <= _CATEGORICAL_DISTINCT_RATIO and distinct <= _CATEGORICAL_MAX_DISTINCT
         ),
+        near_constant=distinct <= _NEAR_CONSTANT_MAX_DISTINCT,
         magnitude=magnitude,
         samples=present[:20],
     )

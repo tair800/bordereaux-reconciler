@@ -1,0 +1,43 @@
+# Local development and the evidence lane. Two services, both free, neither of them required for a
+# reader who only wants to run the tests — the reconciliation engine has no database dependency at
+# all, and that is deliberate: the money logic is pure, so it can be tested without infrastructure.
+#
+# Postgres is here because the *store* is where claim 1's idempotency is enforced, and it is
+# enforced by a primary key. Proving that against SQLite would prove something about SQLite:
+# NUMERIC is exact in Postgres and is emulated through a float in SQLite, and a project whose
+# central claim is exact money cannot demonstrate it on an engine that does not have it.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: bordereaux
+      POSTGRES_PASSWORD: bordereaux_local_only
+      POSTGRES_DB: bordereaux
+    ports:
+      # A high port of its own. The workspace runs other projects' databases on other ports and
+      # nothing here should collide with them.
+      - "127.0.0.1:15437:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bordereaux -d bordereaux"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    volumes:
+      - bordereaux_pgdata:/var/lib/postgresql/data
+
+  app:
+    build: .
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      BX_DATABASE_URL: postgresql+psycopg://bordereaux:bordereaux_local_only@postgres:5432/bordereaux
+      # Read-only by default, as the public deployment is. A console that can approve a mapping
+      # needs the token set explicitly; nothing defaults into being able to write.
+      BX_READ_ONLY: "true"
+    ports:
+      - "127.0.0.1:8060:8000"
+
+volumes:
+  bordereaux_pgdata:

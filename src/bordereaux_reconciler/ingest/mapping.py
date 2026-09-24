@@ -65,6 +65,10 @@ WEIGHT_MONETARY = 2.0
 WEIGHT_TEMPORAL = 2.0
 WEIGHT_MAGNITUDE = 2.0
 WEIGHT_CATEGORICAL = 1.0
+#: As heavy as the monetary and temporal checks. Two temporal columns in one file are common —
+#: the reporting month and the date something happened — and this is the only declared shape
+#: that separates them, so it has to weigh as much as the one they share.
+WEIGHT_NEAR_CONSTANT = 2.0
 
 #: Total declared weight at which a field is treated as having fully described its values.
 SPECIFICITY_FULL = 3.0
@@ -254,6 +258,14 @@ def _shape_evidence(profile: ColumnProfile, field: CanonicalField) -> tuple[floa
         weighted.append((1.0 if agree else 0.0, WEIGHT_CATEGORICAL))
         notes.append("categorical as expected" if agree else "not categorical as expected")
 
+    if shape.near_constant is not None:
+        agree = profile.near_constant == shape.near_constant
+        weighted.append((1.0 if agree else 0.0, WEIGHT_NEAR_CONSTANT))
+        notes.append(
+            f"{profile.distinct} distinct value(s) across the column, "
+            f"{'as expected' if agree else 'which is not what this field expects'}"
+        )
+
     if shape.magnitude_rank is not None and profile.magnitude_rank is not None:
         # The signal a header cannot give: within one file, gross is the largest money column,
         # commission the next, tax the smallest. Exact rank agreement is strong evidence; one rank
@@ -331,7 +343,13 @@ def propose_mapping(
                 )
             )
 
-    scores.sort(key=lambda s: (-s.combined, s.header, s.field))
+    # Strongest combined evidence first, then the strongest *single* signal, and only then the
+    # alphabet. The middle terms are not decoration. Noisy-OR saturates: once either signal reaches
+    # 1.0 the combined score is 1.0 whatever the other one says, so a column whose header matches no
+    # synonym at all can tie with one that matches exactly — and sorting on the header text next
+    # would settle a question about evidence by spelling. `Inception Date` beat `Period` for the
+    # reporting-period field that way, on every layout that carried both.
+    scores.sort(key=lambda s: (-s.combined, -s.header_score, -s.shape_score, s.header, s.field))
 
     taken_fields: set[str] = set()
     taken_headers: set[str] = set()

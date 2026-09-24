@@ -1,0 +1,22 @@
+{
+  "canonical_digest_stable": true,
+  "canonical_digests": [
+    "f893c7aea31d86def4a6ed768aa5ed0b54af08020763a7101524c7de0f3a06a5",
+    "f893c7aea31d86def4a6ed768aa5ed0b54af08020763a7101524c7de0f3a06a5"
+  ],
+  "kill_condition": "A",
+  "method": "the whole corpus is read, mapped, canonicalised and reconciled once per run in a fresh pass; every canonical amount is hashed as str(Decimal) so 10.50 and 10.5 differ, because they do",
+  "provenance": {
+    "commit": "9a9bb3edfaef87fedb53d1169b0bd62c00fa3ae3",
+    "is_synthetic_corpus": true,
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.12.13"
+  },
+  "runs": 2,
+  "status_digest_stable": true,
+  "status_digests": [
+    "67b048514c7a8a8b89e69938189001714b932b79d3372f4502563b17774d3b07",
+    "67b048514c7a8a8b89e69938189001714b932b79d3372f4502563b17774d3b07"
+  ],
+  "variants": 18
+}

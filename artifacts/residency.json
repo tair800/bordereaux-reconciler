@@ -1,0 +1,47 @@
+{
+  "does_not_prove": "that any of this is deployed. No Azure subscription exists in this build, nothing has been applied, and `terraform output` has never run. A region in a configuration is a request to a cloud provider, not a measurement of where bytes came to rest, and selecting one asserts no regulatory compliance of any kind",
+  "environments": {
+    "bench": {
+      "committed_manifest_present": true,
+      "declared_jurisdiction": null,
+      "declared_region": "swedencentral",
+      "inference_topologies": [
+        "azure_openai",
+        "hosted_api",
+        "selfhost_gpu"
+      ],
+      "matches_module": true,
+      "rendered_digest": "61d2fcf5405db4f6333c21d6072607bfaa1bb21f7eae5c6eddf11bc8bf37c7c0"
+    },
+    "dev": {
+      "committed_manifest_present": true,
+      "declared_jurisdiction": null,
+      "declared_region": "swedencentral",
+      "inference_topologies": [
+        "azure_openai",
+        "hosted_api"
+      ],
+      "matches_module": true,
+      "rendered_digest": "048d522627b289b584e5392d5d9aafd2ba73cfcb0f0b70073362eba1603f4885"
+    },
+    "prod": {
+      "committed_manifest_present": true,
+      "declared_jurisdiction": null,
+      "declared_region": "swedencentral",
+      "inference_topologies": [
+        "azure_openai",
+        "hosted_api"
+      ],
+      "matches_module": true,
+      "rendered_digest": "ea9b65f176e3c56250f3e5771cd0dde4a0688bee47ad5588aca7c70e5a81adda"
+    }
+  },
+  "kill_condition": "H",
+  "provenance": {
+    "commit": "9a9bb3edfaef87fedb53d1169b0bd62c00fa3ae3",
+    "is_synthetic_corpus": true,
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.12.13"
+  },
+  "proves": "the committed manifest was rendered from the same committed inputs Terraform reads, so a region changed in one place and not the other fails the build"
+}

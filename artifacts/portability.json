@@ -1,0 +1,47 @@
+{
+  "engine_module_digests": {
+    "domain.py": "01f8d445b4a64f72",
+    "ingest/canonical.py": "11c086b804b0b628",
+    "ingest/mapping.py": "f3a10cb5f1654ae1",
+    "ingest/profile.py": "9bf996d5ef391812",
+    "ingest/read.py": "56d695b367542409",
+    "money.py": "d4b3e7346d534303",
+    "reconcile.py": "3dfb4540a824f33b",
+    "store/ledger.py": "753f02826c49d302",
+    "store/schema.py": "3a2f974f608134f1"
+  },
+  "engine_modules_touched_outside_adapters": [],
+  "families": [
+    "insurance",
+    "marketplace"
+  ],
+  "insurance_engine_digest": "8440eb393169c11a5b0642c759ca0c8f09e958dba355825f82376d8c3ba0399f",
+  "insurance_rows_reconciled": 1606,
+  "kill_condition": "G",
+  "method": "both families run through one loaded copy of the engine in one process, so the digests are equal by construction; the falsifiable part is the leak scan, which parses each engine module, discards its docstrings, and looks for any registered family name or canonical field name among the identifiers and string literals of the code it runs",
+  "non_insurance_rows_reconciled": 725,
+  "provenance": {
+    "commit": "9a9bb3edfaef87fedb53d1169b0bd62c00fa3ae3",
+    "is_synthetic_corpus": true,
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.12.13"
+  },
+  "shared_engine_digest": "8440eb393169c11a5b0642c759ca0c8f09e958dba355825f82376d8c3ba0399f",
+  "vocabulary_checked": [
+    "category",
+    "commission",
+    "fee",
+    "gross_premium",
+    "gross_sales",
+    "insurance",
+    "insured_name",
+    "marketplace",
+    "net_premium",
+    "order_reference",
+    "payout",
+    "peril",
+    "policy_reference",
+    "seller_name",
+    "tax"
+  ]
+}

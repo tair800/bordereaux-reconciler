@@ -1,0 +1,49 @@
+{
+  "adversarial_cases": [
+    "abbreviated_header",
+    "duplicate_row",
+    "localised_date",
+    "rows_agree_total_does_not",
+    "same_amount_different_policy",
+    "same_policy_different_premium",
+    "split_commission",
+    "swapped_gross_net",
+    "tax_included_vs_excluded",
+    "totals_agree_rows_do_not",
+    "unseen_synonym"
+  ],
+  "canonical_rows": 2333,
+  "corpus_digest": "6147c73f4b8d9f661c5fabf74fa58ff3bd817240478c22d9ae0b9f7c76451fe0",
+  "families": [
+    "insurance",
+    "marketplace"
+  ],
+  "generated_at": "2026-09-24T00:00:00Z",
+  "generator_version": "1.0.0",
+  "held_out_variants": 6,
+  "holdout": [
+    "ins_01_canonical_gbp",
+    "ins_02_legacy_names_eur",
+    "ins_10_localised_dates_nbsp",
+    "ins_11_unseen_vocabulary",
+    "mkt_05_unseen_vocabulary",
+    "mkt_06_unmappable_positional"
+  ],
+  "holdout_rule": "held out if blake2b(variant_id, digest_size=8) % 100 < 30, or if the variant declares vocabulary_is_unseen; assignment uses no seed and no score, so it cannot be re-drawn",
+  "is_synthetic": true,
+  "notice": "Synthetic data, generated from a committed seed. It is not real-world labelled data and must never be described as such: no redistributable corpus of delegated-authority bordereaux exists, because those files carry commercial terms and personal data.",
+  "provenance": {
+    "commit": "9a9bb3edfaef87fedb53d1169b0bd62c00fa3ae3",
+    "is_synthetic_corpus": true,
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.12.13"
+  },
+  "rows_ingested_by_the_pipeline": 2333,
+  "rows_quarantined_by_the_pipeline": 2,
+  "schema_variants": 18,
+  "seed": 20260924,
+  "unmappable": [
+    "ins_12_unmappable_pivot",
+    "mkt_06_unmappable_positional"
+  ]
+}

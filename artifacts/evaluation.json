@@ -1,0 +1,300 @@
+{
+  "development": {
+    "mapping": {
+      "baselines": {
+        "curated_synonyms": {
+          "accuracy": 0.8369565217391305,
+          "correct": 77,
+          "total": 92
+        },
+        "exact_header": {
+          "accuracy": 0.32608695652173914,
+          "correct": 30,
+          "total": 92
+        },
+        "fuzzy_header": {
+          "accuracy": 0.7065217391304348,
+          "correct": 65,
+          "total": 92
+        },
+        "normalised_header": {
+          "accuracy": 0.6195652173913043,
+          "correct": 57,
+          "total": 92
+        }
+      },
+      "definition": "scored over the adapter's canonical fields, not the file's columns: for each field the mapper is correct when it assigns the column ground truth assigns, and when it assigns nothing to a field the file does not contain",
+      "system": {
+        "accuracy": 0.9130434782608695,
+        "correct": 84,
+        "errors": [
+          {
+            "variant_id": "ins_04_split_commission_usd",
+            "wrong": [
+              "commission: expected 'Sub-Agent Commission', got 'Broker Commission'"
+            ]
+          },
+          {
+            "variant_id": "ins_05_tax_basis_ambiguous",
+            "wrong": [
+              "gross_premium: expected 'Total Due (incl IPT)', got 'Premium (excl IPT)'"
+            ]
+          },
+          {
+            "variant_id": "ins_12_unmappable_pivot",
+            "wrong": [
+              "commission: expected None, got 'Q1'",
+              "gross_premium: expected None, got 'Q3'",
+              "net_premium: expected None, got 'Q2'",
+              "tax: expected None, got 'Q4'"
+            ]
+          },
+          {
+            "variant_id": "mkt_01_canonical_usd",
+            "wrong": [
+              "seller_name: expected None, got 'Seller ID'"
+            ]
+          },
+          {
+            "variant_id": "mkt_03_no_net_column",
+            "wrong": [
+              "seller_name: expected None, got 'Seller ID'"
+            ]
+          }
+        ],
+        "total": 92
+      }
+    },
+    "reconciliation": {
+      "false_matched": 0,
+      "false_matched_definition": "reported MATCHED while a reconciled field differs by more than the declared tolerance",
+      "false_matched_examples": [],
+      "injected_discrepancies": 195,
+      "injection_kinds": {
+        "absent_from_carrier": "missing",
+        "carrier_only": "missing",
+        "carrier_row_disagrees_with_itself": "review",
+        "deduction_changed_gross_agrees": "mismatch",
+        "gross_materially_different": "mismatch",
+        "gross_off_by_one_minor_unit": "mismatch"
+      },
+      "rows": 1616,
+      "status_disagreement_examples": [
+        {
+          "expected": "matched",
+          "key": "POL-202602-00001|2026-02",
+          "reported": "review",
+          "variant_id": "ins_04_split_commission_usd"
+        },
+        {
+          "expected": "matched",
+          "key": "POL-202602-00002|2026-02",
+          "reported": "review",
+          "variant_id": "ins_04_split_commission_usd"
+        },
+        {
+          "expected": "matched",
+          "key": "POL-202602-00003|2026-02",
+          "reported": "review",
+          "variant_id": "ins_04_split_commission_usd"
+        },
+        {
+          "expected": "matched",
+          "key": "POL-202602-00004|2026-02",
+          "reported": "review",
+          "variant_id": "ins_04_split_commission_usd"
+        },
+        {
+          "expected": "matched",
+          "key": "POL-202602-00005|2026-02",
+          "reported": "review",
+          "variant_id": "ins_04_split_commission_usd"
+        },
+        {
+          "expected": "matched",
+          "key": "POL-202602-00006|2026-02",
+          "reported": "review",
+          "variant_id": "ins_04_split_commission_usd"
+        },
+        {
+          "expected": "matched",
+          "key": "POL-202602-00007|2026-02",
+          "reported": "review",
+          "variant_id": "ins_04_split_commission_usd"
+        },
+        {
+          "expected": "matched",
+          "key": "POL-202602-00008|2026-02",
+          "reported": "review",
+          "variant_id": "ins_04_split_commission_usd"
+        },
+        {
+          "expected": "matched",
+          "key": "POL-202602-00010|2026-02",
+          "reported": "review",
+          "variant_id": "ins_04_split_commission_usd"
+        },
+        {
+          "expected": "matched",
+          "key": "POL-202602-00011|2026-02",
+          "reported": "review",
+          "variant_id": "ins_04_split_commission_usd"
+        },
+        {
+          "expected": "matched",
+          "key": "POL-202602-00013|2026-02",
+          "reported": "review",
+          "variant_id": "ins_04_split_commission_usd"
+        },
+        {
+          "expected": "matched",
+          "key": "POL-202602-00014|2026-02",
+          "reported": "review",
+          "variant_id": "ins_04_split_commission_usd"
+        },
+        {
+          "expected": "matched",
+          "key": "POL-202602-00015|2026-02",
+          "reported": "review",
+          "variant_id": "ins_04_split_commission_usd"
+        },
+        {
+          "expected": "matched",
+          "key": "POL-202602-00016|2026-02",
+          "reported": "review",
+          "variant_id": "ins_04_split_commission_usd"
+        },
+        {
+          "expected": "matched",
+          "key": "POL-202602-00017|2026-02",
+          "reported": "review",
+          "variant_id": "ins_04_split_commission_usd"
+        },
+        {
+          "expected": "matched",
+          "key": "POL-202602-00018|2026-02",
+          "reported": "review",
+          "variant_id": "ins_04_split_commission_usd"
+        },
+        {
+          "expected": "matched",
+          "key": "POL-202602-00019|2026-02",
+          "reported": "review",
+          "variant_id": "ins_04_split_commission_usd"
+        },
+        {
+          "expected": "matched",
+          "key": "POL-202602-00020|2026-02",
+          "reported": "review",
+          "variant_id": "ins_04_split_commission_usd"
+        },
+        {
+          "expected": "matched",
+          "key": "POL-202602-00021|2026-02",
+          "reported": "review",
+          "variant_id": "ins_04_split_commission_usd"
+        },
+        {
+          "expected": "matched",
+          "key": "POL-202602-00022|2026-02",
+          "reported": "review",
+          "variant_id": "ins_04_split_commission_usd"
+        }
+      ],
+      "status_disagreements": 272
+    },
+    "variants": [
+      "ins_03_abbreviated_reordered",
+      "ins_04_split_commission_usd",
+      "ins_05_tax_basis_ambiguous",
+      "ins_06_swapped_gross_net",
+      "ins_07_duplicates_and_conflicts",
+      "ins_08_total_footer_disagrees",
+      "ins_09_total_agrees_rows_transposed",
+      "ins_12_unmappable_pivot",
+      "mkt_01_canonical_usd",
+      "mkt_02_abbreviated_eur",
+      "mkt_03_no_net_column",
+      "mkt_04_legacy_reordered_refunds"
+    ]
+  },
+  "holdout": {
+    "mapping": {
+      "baselines": {
+        "curated_synonyms": {
+          "accuracy": 0.6521739130434783,
+          "correct": 30,
+          "total": 46
+        },
+        "exact_header": {
+          "accuracy": 0.34782608695652173,
+          "correct": 16,
+          "total": 46
+        },
+        "fuzzy_header": {
+          "accuracy": 0.6304347826086957,
+          "correct": 29,
+          "total": 46
+        },
+        "normalised_header": {
+          "accuracy": 0.5217391304347826,
+          "correct": 24,
+          "total": 46
+        }
+      },
+      "definition": "scored over the adapter's canonical fields, not the file's columns: for each field the mapper is correct when it assigns the column ground truth assigns, and when it assigns nothing to a field the file does not contain",
+      "system": {
+        "accuracy": 0.9130434782608695,
+        "correct": 42,
+        "errors": [
+          {
+            "variant_id": "mkt_06_unmappable_positional",
+            "wrong": [
+              "fee: expected None, got 'field_3'",
+              "gross_sales: expected None, got 'field_2'",
+              "order_reference: expected None, got 'field_0'",
+              "payout: expected None, got 'field_6'"
+            ]
+          }
+        ],
+        "total": 46
+      }
+    },
+    "reconciliation": {
+      "false_matched": 0,
+      "false_matched_definition": "reported MATCHED while a reconciled field differs by more than the declared tolerance",
+      "false_matched_examples": [],
+      "injected_discrepancies": 90,
+      "injection_kinds": {
+        "absent_from_carrier": "missing",
+        "carrier_only": "missing",
+        "carrier_row_disagrees_with_itself": "review",
+        "deduction_changed_gross_agrees": "mismatch",
+        "gross_materially_different": "mismatch",
+        "gross_off_by_one_minor_unit": "mismatch"
+      },
+      "rows": 715,
+      "status_disagreement_examples": [],
+      "status_disagreements": 0
+    },
+    "variants": [
+      "ins_01_canonical_gbp",
+      "ins_02_legacy_names_eur",
+      "ins_10_localised_dates_nbsp",
+      "ins_11_unseen_vocabulary",
+      "mkt_05_unseen_vocabulary",
+      "mkt_06_unmappable_positional"
+    ]
+  },
+  "kill_conditions": [
+    "D",
+    "E"
+  ],
+  "provenance": {
+    "commit": "9a9bb3edfaef87fedb53d1169b0bd62c00fa3ae3",
+    "is_synthetic_corpus": true,
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.12.13"
+  },
+  "scored_once": "the hold-out membership is fixed by blake2b(variant_id) and by the unseen-vocabulary flag, neither of which consults a score. See DECISIONS.md ADR-002 for what was observed before this run and what was changed on the strength of development data"
+}
