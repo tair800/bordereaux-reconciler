@@ -72,10 +72,11 @@ resource "azurerm_postgresql_flexible_server_database" "ledger" {
   charset   = "UTF8"
   collation = "en_US.utf8"
 
-  lifecycle {
-    # Dropping a database because a collation string changed is not a diff anybody wants applied.
-    prevent_destroy = true
-  }
+  # `prevent_destroy` is the obvious guard here and it is not used, because it takes a literal only
+  # — it cannot be switched off for the bench environment, which exists to be destroyed after every
+  # benchmark run, and it would break the destroy-then-apply check this configuration is meant to
+  # pass. The protection that does apply is the backup retention above and, in prod, the fact that
+  # destroying the server is a separate, visible line in the plan.
 }
 
 resource "azurerm_postgresql_flexible_server_firewall_rule" "allowed" {
