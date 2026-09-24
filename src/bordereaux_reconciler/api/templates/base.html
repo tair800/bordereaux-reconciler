@@ -1,0 +1,105 @@
+<!doctype html>
+{#
+  One stylesheet, inline, no build step and no framework. The audience is a delegated-authority
+  technician on a corporate laptop reconciling a month of premium; every screen here is a table with
+  evidence attached, and a bundler would add a second language to a product whose hardest problem is
+  that `1.234,56` means two different numbers depending on who sent it.
+
+  Monetary figures are rendered in a tabular-numeral font and right-aligned, so columns of money
+  line up by decimal point. That is not decoration: a misaligned column is how a reader misses an
+  order of magnitude.
+#}
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Bordereaux Reconciler{% endblock %}</title>
+  <style>
+    :root {
+      --bg: #fbfbfa; --fg: #1a1a18; --muted: #6b6b63; --line: #e2e0da;
+      --panel: #ffffff; --accent: #2b5f4a; --warn: #8a5a00; --bad: #a11b1b; --good: #1f6b3f;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #16171a; --fg: #e9e8e4; --muted: #9b9a93; --line: #2c2e33;
+        --panel: #1d1f23; --accent: #7fcfab; --warn: #e0a33a; --bad: #f08a80; --good: #7fcfab;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; background: var(--bg); color: var(--fg);
+      font: 15px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+    header.top {
+      border-bottom: 1px solid var(--line); background: var(--panel);
+      padding: 14px 16px; display: flex; flex-wrap: wrap; gap: 16px; align-items: baseline;
+    }
+    header.top a.brand { font-weight: 650; color: var(--fg); text-decoration: none; }
+    nav a { color: var(--muted); text-decoration: none; margin-right: 14px; }
+    nav a:hover, nav a:focus { color: var(--accent); text-decoration: underline; }
+    .chip {
+      font-size: 12px; padding: 2px 8px; border: 1px solid var(--line);
+      border-radius: 999px; color: var(--muted); white-space: nowrap;
+    }
+    .chip.ro { border-color: var(--warn); color: var(--warn); }
+    main { max-width: 1180px; margin: 0 auto; padding: 24px 16px 64px; }
+    h1 { font-size: 22px; margin: 0 0 4px; }
+    h2 { font-size: 16px; margin: 32px 0 10px; }
+    p.lede { color: var(--muted); margin: 0 0 24px; max-width: 70ch; }
+    .panel {
+      background: var(--panel); border: 1px solid var(--line);
+      border-radius: 10px; padding: 16px; margin-bottom: 20px;
+    }
+    .banner { border-left: 4px solid var(--good); }
+    .banner.bad { border-left-color: var(--bad); }
+    .banner h2 { margin-top: 0; }
+    .big { font-size: 30px; font-weight: 650; font-variant-numeric: tabular-nums; }
+    .big.bad { color: var(--bad); }
+    .big.good { color: var(--good); }
+    .grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+    table { border-collapse: collapse; width: 100%; font-size: 14px; }
+    th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); }
+    th { color: var(--muted); font-weight: 550; font-size: 12px; text-transform: uppercase;
+         letter-spacing: .04em; }
+    td.num, th.num { text-align: right; font-variant-numeric: tabular-nums;
+                     font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    code, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .muted { color: var(--muted); }
+    .status { font-size: 12px; padding: 1px 7px; border-radius: 4px; border: 1px solid var(--line); }
+    .status.matched { color: var(--good); border-color: var(--good); }
+    .status.mismatch, .status.duplicate { color: var(--warn); border-color: var(--warn); }
+    .status.missing, .status.ambiguous { color: var(--bad); border-color: var(--bad); }
+    .empty { color: var(--muted); padding: 28px 4px; text-align: center; }
+    .wrap { overflow-x: auto; }
+    a { color: var(--accent); }
+    footer { color: var(--muted); font-size: 13px; border-top: 1px solid var(--line);
+             margin-top: 40px; padding: 16px; text-align: center; }
+    @media (max-width: 640px) { main { padding: 16px; } header.top { padding: 12px 16px; } }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/">Bordereaux Reconciler</a>
+    <nav>
+      <a href="/">Overview</a>
+      <a href="/quarantine">Quarantine</a>
+      <a href="/mappings">Mappings</a>
+      <a href="/evidence">Evidence</a>
+      <a href="/docs">API</a>
+    </nav>
+    <span style="flex:1"></span>
+    <span class="chip">{{ environment }}</span>
+    {% if not writes_enabled %}
+      <span class="chip ro" title="BX_READ_ONLY is set and no approver token is configured.
+Confirming a mapping changes how a coverholder's premium is read, so this deployment cannot.">
+        read-only
+      </span>
+    {% endif %}
+  </header>
+  <main>{% block content %}{% endblock %}</main>
+  <footer>
+    Every figure on this site is derived from a <strong>synthetic</strong> corpus generated from a
+    committed seed. It is not real bordereau data and is not described as such anywhere.
+  </footer>
+</body>
+</html>

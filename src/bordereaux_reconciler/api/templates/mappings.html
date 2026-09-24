@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}Mappings — Bordereaux Reconciler{% endblock %}
+{% block content %}
+<h1>Mappings</h1>
+<p class="lede">
+  A mapping says which column of a coverholder's spreadsheet is the gross premium. Every one of
+  them has a person's name on it: <code>confirmed_by</code> is not nullable in the schema, so a
+  mapping that a model proposed and nobody accepted cannot be in this table. Mappings are versioned
+  rather than edited, because re-deriving a period under a new version must leave last month's
+  numbers attributable to the version that produced them.
+</p>
+
+{% if not writes_enabled %}
+<section class="panel" style="border-left:4px solid var(--warn)">
+  <strong>This deployment cannot confirm a mapping.</strong>
+  <p class="muted" style="margin:6px 0 0; max-width:72ch">
+    <code>BX_READ_ONLY</code> is set and no approver token is configured, so
+    <code>POST /mappings/{coverholder}/confirm</code> answers 403 for everybody including its
+    operator. Confirming changes how a coverholder's premium is read, which is not something an
+    anonymous visitor to a public demo does.
+  </p>
+</section>
+{% endif %}
+
+<h2>Confirmed</h2>
+{% if contracts %}
+<div class="panel wrap" style="padding:0">
+  <table>
+    <thead><tr>
+      <th>coverholder</th><th class="num">version</th><th>family</th>
+      <th>columns</th><th>confirmed by</th><th>at</th>
+    </tr></thead>
+    <tbody>
+      {% for c in contracts %}
+      <tr>
+        <td>{{ c.coverholder }}</td>
+        <td class="num">{{ c.version }}</td>
+        <td class="muted">{{ c.family }}</td>
+        <td class="mono" style="font-size:12px">
+          {% for header, field in c.columns.items() %}
+            {{ header }} → {{ field }}{% if not loop.last %} · {% endif %}
+          {% endfor %}
+        </td>
+        <td>{{ c.confirmed_by }}</td>
+        <td class="muted">{{ c.confirmed_at }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="panel empty">No mapping has been confirmed in this database.</div>
+{% endif %}
+
+<h2>Canonical fields, by adapter</h2>
+<p class="muted" style="max-width:72ch">
+  The vocabulary a mapping may use. A proposal naming anything outside these sets is rejected before
+  a person sees it — not corrected afterwards, because somebody confirming a list is checking the
+  mapping, not auditing the proposer for invented field names. The <code>shape</code> column is the
+  evidence a header-string method cannot use: what the column&rsquo;s <em>values</em> look like.
+</p>
+{% for family, fields in families.items() %}
+<div class="panel wrap" style="padding:0; margin-bottom:14px">
+  <table>
+    <thead><tr>
+      <th colspan="5" style="font-size:13px; text-transform:none; letter-spacing:0">
+        <strong>{{ family }}</strong>
+      </th>
+    </tr>
+    <tr><th>field</th><th>role</th><th>required</th><th>synonyms</th><th>declared shape</th></tr>
+    </thead>
+    <tbody>
+      {% for f in fields %}
+      <tr>
+        <td class="mono">{{ f.name }}</td>
+        <td class="muted">{{ f.role }}</td>
+        <td>{% if f.required %}yes{% else %}<span class="muted">no</span>{% endif %}</td>
+        <td class="muted" style="font-size:12px">{{ f.synonyms|join(", ") }}</td>
+        <td class="mono" style="font-size:12px">
+          {% if f.shape.monetary is not none %}monetary {{ f.shape.monetary }}{% endif %}
+          {% if f.shape.temporal is not none %} · temporal {{ f.shape.temporal }}{% endif %}
+          {% if f.shape.magnitude_rank is not none %} · size rank {{ f.shape.magnitude_rank }}{% endif %}
+          {% if f.shape.categorical is not none %} · categorical {{ f.shape.categorical }}{% endif %}
+          {% if f.shape.near_constant is not none %} · near-constant {{ f.shape.near_constant }}{% endif %}
+          {% if f.shape.pattern %} · <code>{{ f.shape.pattern }}</code>{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endfor %}
+{% endblock %}

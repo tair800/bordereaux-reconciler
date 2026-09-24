@@ -22,7 +22,7 @@
   "ledger_rows_written_for_unmappable": 0,
   "method": "abstention is triggered by a required canonical field having no column assigned to it, not by a confidence score falling below a number \u2014 a threshold is something that can be lowered, and a missing required field is not",
   "provenance": {
-    "commit": "9a9bb3edfaef87fedb53d1169b0bd62c00fa3ae3",
+    "commit": "15c7f6c7fb1435881f37b25cd5051f30f3506bf2",
     "is_synthetic_corpus": true,
     "platform": "Windows-11-10.0.26200-SP0",
     "python": "3.12.13"

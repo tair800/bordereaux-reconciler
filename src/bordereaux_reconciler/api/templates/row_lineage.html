@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}{{ row.key }} — lineage{% endblock %}
+{% block content %}
+<h1 class="mono">{{ row.key }}</h1>
+<p class="lede">
+  Every value on this row, traced to the cell it was read from. This is what makes a figure
+  arguable: a technician who disputes an amount has the sheet, the row number as the spreadsheet
+  numbers it, the source header verbatim, and the raw text before any normalisation — enough to open
+  the original file and look at the same cell.
+</p>
+
+<section class="panel">
+  <div class="grid">
+    <div>
+      <div class="muted">Gross</div>
+      <div class="big mono">{{ row.gross }}</div>
+    </div>
+    <div>
+      <div class="muted">Net</div>
+      <div class="big mono">{% if row.net is not none %}{{ row.net }}{% else %}—{% endif %}</div>
+    </div>
+    <div>
+      <div class="muted">Currency</div>
+      <div class="big">{{ row.currency }}</div>
+    </div>
+    <div>
+      <div class="muted">Period</div>
+      <div class="big mono">{{ row.period }}</div>
+    </div>
+  </div>
+  {% if row.deductions %}
+  <p class="muted" style="margin:14px 0 0">
+    Deductions:
+    {% for name, amount in row.deductions.items() %}
+      <code>{{ name }} {{ amount }}</code>{% if not loop.last %} · {% endif %}
+    {% endfor %}
+    — stored as strings, because a JSON number is an IEEE 754 double in every parser worth naming.
+  </p>
+  {% endif %}
+</section>
+
+<h2>Lineage ({{ row.lineage|length }} cells)</h2>
+<div class="panel wrap" style="padding:0">
+  <table>
+    <thead><tr>
+      <th>sheet</th><th class="num">row</th><th>source header</th>
+      <th>raw value</th><th class="num">mapping v</th>
+    </tr></thead>
+    <tbody>
+      {% for cell in row.lineage %}
+      <tr>
+        <td class="mono">{{ cell.sheet }}</td>
+        <td class="num">{{ cell.row }}</td>
+        <td class="mono">{{ cell.column }}</td>
+        <td class="mono">{{ cell.raw_value }}</td>
+        <td class="num">{{ cell.mapping_version }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if source %}
+<p class="muted" style="margin-top:14px">
+  From <a href="/files/{{ source.content_hash }}">{{ source.filename }}</a>, sent by
+  {{ source.coverholder }}.
+</p>
+{% endif %}
+{% endblock %}

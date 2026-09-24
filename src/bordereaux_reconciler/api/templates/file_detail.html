@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}{{ file.filename }} — Bordereaux Reconciler{% endblock %}
+{% block content %}
+<h1>{{ file.filename }}</h1>
+<p class="lede">
+  {{ file.coverholder }} · {{ file.family }} · mapping version {{ file.mapping_version }} ·
+  ingested {{ file.ingested_at }}
+</p>
+
+<section class="panel">
+  <div class="grid">
+    <div>
+      <div class="muted">Ledger rows</div>
+      <div class="big">{{ file.row_count }}</div>
+    </div>
+    <div>
+      <div class="muted">Held back</div>
+      <div class="big {% if file.quarantined_count %}bad{% endif %}">
+        {{ file.quarantined_count }}
+      </div>
+    </div>
+    <div>
+      <div class="muted">Period</div>
+      <div class="big mono">{{ file.period or "—" }}</div>
+    </div>
+  </div>
+  <p class="muted" style="margin:14px 0 0; max-width:75ch">
+    {# Worth saying on the screen rather than only in the schema: the hash is the identity, which is
+       why re-sending this file writes nothing instead of appending a second copy of the month. #}
+    Content hash <code>{{ file.content_hash }}</code> — this is the primary key of the file record,
+    so sending these exact bytes again is refused by the database rather than by a check somebody
+    has to remember to write.
+  </p>
+</section>
+
+{% if quarantined %}
+<h2>Held back ({{ quarantined|length }})</h2>
+<div class="panel wrap" style="padding:0">
+  <table>
+    <thead><tr><th class="num">sheet row</th><th>reason</th><th>raw value</th></tr></thead>
+    <tbody>
+      {% for q in quarantined %}
+      <tr>
+        <td class="num">{{ q.spreadsheet_row }}</td>
+        <td>{{ q.reason }}</td>
+        <td class="mono">{{ q.raw_value or "—" }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+<h2>Canonical rows{% if rows|length >= 500 %} (first 500){% endif %}</h2>
+{% if rows %}
+<div class="panel wrap" style="padding:0">
+  <table>
+    <thead><tr>
+      <th>key</th><th>period</th><th>ccy</th><th class="num">gross</th>
+      <th>deductions</th><th class="num">net</th><th></th>
+    </tr></thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td class="mono">{{ r.key }}</td>
+        <td class="mono">{{ r.period }}</td>
+        <td>{{ r.currency }}</td>
+        <td class="num">{{ r.gross }}</td>
+        <td class="mono muted">
+          {% for name, amount in r.deductions.items() %}
+            {{ name }} {{ amount }}{% if not loop.last %} · {% endif %}
+          {% endfor %}
+        </td>
+        <td class="num">{% if r.net is not none %}{{ r.net }}{% else %}—{% endif %}</td>
+        <td><a href="/rows/{{ r.id }}">lineage</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="panel empty">
+  No canonical rows. Either every row was held back, or no column could be mapped to a required
+  canonical field — in which case nothing was written at all, which is the intended behaviour
+  rather than a failure.
+</div>
+{% endif %}
+{% endblock %}

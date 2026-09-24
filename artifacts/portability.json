@@ -21,7 +21,7 @@
   "method": "both families run through one loaded copy of the engine in one process, so the digests are equal by construction; the falsifiable part is the leak scan, which parses each engine module, discards its docstrings, and looks for any registered family name or canonical field name among the identifiers and string literals of the code it runs",
   "non_insurance_rows_reconciled": 725,
   "provenance": {
-    "commit": "9a9bb3edfaef87fedb53d1169b0bd62c00fa3ae3",
+    "commit": "15c7f6c7fb1435881f37b25cd5051f30f3506bf2",
     "is_synthetic_corpus": true,
     "platform": "Windows-11-10.0.26200-SP0",
     "python": "3.12.13"

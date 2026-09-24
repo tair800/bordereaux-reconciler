@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}Overview — Bordereaux Reconciler{% endblock %}
+{% block content %}
+<h1>Overview</h1>
+<p class="lede">
+  Delegated-authority bordereaux reconciled against a carrier ledger. Money is exact decimal
+  throughout, every canonical value carries the cell it came from, and a model may propose a column
+  mapping and nothing else.
+</p>
+
+{#
+  This banner renders whether the count is zero or not. A warning that only appears when something
+  is wrong teaches nobody where to look, and a reader arriving at a reconciliation tool should be
+  told the first number worth checking rather than left to find it.
+#}
+{% set ev = artifacts.get('evaluation') %}
+{% set fm = ev.holdout.reconciliation.false_matched if ev else None %}
+<section class="panel banner {% if fm is none or fm > 0 %}bad{% endif %}">
+  <h2>False MATCHED on the frozen hold-out</h2>
+  {% if ev %}
+    <div class="big {% if fm > 0 %}bad{% else %}good{% endif %}">{{ fm }}</div>
+    <p class="muted" style="margin:6px 0 0; max-width:72ch">
+      Rows reported as agreeing while a reconciled field differed by more than the declared
+      tolerance, across {{ ev.holdout.reconciliation.rows }} hold-out rows carrying
+      {{ ev.holdout.reconciliation.injected_discrepancies }} deliberately injected discrepancies.
+      This is the one number in the project with no acceptable non-zero value: a reconciler that
+      silently reports money as agreeing when it does not is worse than one that refuses to answer.
+    </p>
+    {% if fm > 0 %}
+      <div class="wrap" style="margin-top:12px">
+        <table>
+          <thead><tr>
+            <th>variant</th><th>key</th><th>expected</th><th>reported</th><th>injected</th>
+          </tr></thead>
+          <tbody>
+          {% for bad in ev.holdout.reconciliation.false_matched_examples %}
+            <tr>
+              <td class="mono">{{ bad.variant_id }}</td>
+              <td class="mono">{{ bad.key }}</td>
+              <td>{{ bad.expected_status }}</td>
+              <td>{{ bad.reported_status }}</td>
+              <td class="muted">{{ bad.injected_discrepancy }}</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% endif %}
+  {% else %}
+    <div class="big">not measured</div>
+    <p class="muted" style="margin:6px 0 0">
+      No evidence has been built in this checkout. Run <code>make corpus</code> then
+      <code>make artifacts</code>. Nothing here will guess at a number that was not measured.
+    </p>
+  {% endif %}
+</section>
+
+<section class="grid">
+  <div class="panel">
+    <div class="muted">Files ingested</div>
+    <div class="big">{{ counts.files }}</div>
+  </div>
+  <div class="panel">
+    <div class="muted">Ledger rows</div>
+    <div class="big">{{ counts.ledger_rows }}</div>
+  </div>
+  <div class="panel">
+    <div class="muted">Awaiting review</div>
+    <div class="big {% if counts.quarantined %}bad{% endif %}">{{ counts.quarantined }}</div>
+    <div class="muted" style="font-size:13px"><a href="/quarantine">quarantined rows</a></div>
+  </div>
+  <div class="panel">
+    <div class="muted">Audit events</div>
+    <div class="big">{{ counts.audit_events }}</div>
+  </div>
+</section>
+
+<h2>Recently ingested</h2>
+{% if files %}
+<div class="panel wrap" style="padding:0">
+  <table>
+    <thead><tr>
+      <th>file</th><th>coverholder</th><th>family</th><th>period</th>
+      <th class="num">rows</th><th class="num">held</th><th>status</th><th>content hash</th>
+    </tr></thead>
+    <tbody>
+      {% for f in files %}
+      <tr>
+        <td><a href="/files/{{ f.content_hash }}">{{ f.filename }}</a></td>
+        <td>{{ f.coverholder }}</td>
+        <td class="muted">{{ f.family }}</td>
+        <td class="mono">{{ f.period or "—" }}</td>
+        <td class="num">{{ f.row_count }}</td>
+        <td class="num">{{ f.quarantined_count }}</td>
+        <td><span class="status {{ f.status }}">{{ f.status }}</span></td>
+        <td class="mono muted" title="{{ f.content_hash }}">{{ f.content_hash[:12] }}…</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="panel empty">
+  Nothing has been ingested into this database yet. Run <code>make artifacts</code>, which ingests
+  the whole synthetic corpus three times over to prove that doing so twice changes nothing.
+</div>
+{% endif %}
+{% endblock %}

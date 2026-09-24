@@ -161,11 +161,12 @@ def column_digest(headers: Sequence[str], samples: Mapping[str, Sequence[str]]) 
     """
     import hashlib  # noqa: PLC0415 - used once, at the bottom of a hot-ish path
 
-    payload = json.dumps(
-        {h: list(samples.get(h, ()))[:PROMPT_SAMPLE_ROWS] for h in sorted(headers)},
-        sort_keys=True,
-        ensure_ascii=False,
-    )
+    # The sorted header tuple, and deliberately **not** the sample values. This hashed the samples
+    # too, which made every sentence above it false: March and April carry the same columns and
+    # different rows, so a digest that included the rows changed every month and the cassette missed
+    # on exactly the files it exists to cover. `samples` stays in the signature because the
+    # provider protocol passes it and a future keying scheme may want it; it is unused on purpose.
+    payload = json.dumps(sorted(headers), ensure_ascii=False)
     return hashlib.sha256(payload.encode()).hexdigest()[:16]
 
 

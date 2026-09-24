@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+{% block title %}Evidence — Bordereaux Reconciler{% endblock %}
+{% block content %}
+<h1>Evidence</h1>
+<p class="lede">
+  Eight artifacts, graded by a test that was committed before any of the implementation existed and
+  has not been edited since. Every number on this page comes from a file in <code>artifacts/</code>
+  and the page says which — a claim a reader cannot trace to a build output is a claim this project
+  is not entitled to make.
+</p>
+
+{% if not artifacts %}
+<div class="panel empty">
+  No evidence has been built in this checkout. Run <code>make corpus</code> then
+  <code>make artifacts</code>.
+</div>
+{% else %}
+
+{% set ev = artifacts.get("evaluation") %}
+{% if ev %}
+<h2>The scored hold-out</h2>
+<p class="muted" style="max-width:74ch">
+  Six of eighteen schema variants, chosen by <code>blake2b(variant_id)</code> and by the
+  unseen-vocabulary flag — a rule that consults no seed and no score, so it cannot be re-drawn to
+  flatter a result. <a href="https://github.com/tair800/bordereaux-reconciler/blob/main/DECISIONS.md">ADR-002</a>
+  records what was observed before the scoring run and what changed in between.
+</p>
+<div class="panel wrap" style="padding:0">
+  <table>
+    <thead><tr>
+      <th>split</th><th class="num">rows</th><th class="num">injected</th>
+      <th class="num">false MATCHED</th><th class="num">mapping</th><th class="num">best baseline</th>
+    </tr></thead>
+    <tbody>
+      {% for name in ["holdout", "development"] %}
+      {% set split = ev[name] %}
+      {% set best = split.mapping.baselines.values()|map(attribute="accuracy")|max %}
+      <tr>
+        <td><strong>{{ name }}</strong> <span class="muted">({{ split.variants|length }})</span></td>
+        <td class="num">{{ split.reconciliation.rows }}</td>
+        <td class="num">{{ split.reconciliation.injected_discrepancies }}</td>
+        <td class="num">
+          <span class="status {% if split.reconciliation.false_matched %}missing{% else %}matched{% endif %}">
+            {{ split.reconciliation.false_matched }}
+          </span>
+        </td>
+        <td class="num">{{ "%.4f"|format(split.mapping.system.accuracy) }}</td>
+        <td class="num muted">{{ "%.4f"|format(best) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<h2>Mapping, against the four predeclared baselines</h2>
+<p class="muted" style="max-width:74ch">
+  All four are header-string methods, which is the point: the system&rsquo;s contribution is that it
+  also reads what the column <em>contains</em>. The baselines were named in ADR-001 before any of
+  them was implemented, so the strongest one cannot quietly have been dropped.
+</p>
+<div class="panel wrap" style="padding:0">
+  <table>
+    <thead><tr>
+      <th>method</th><th class="num">hold-out</th><th class="num">development</th>
+    </tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>value-shape + header (this system)</strong></td>
+        <td class="num">{{ "%.4f"|format(ev.holdout.mapping.system.accuracy) }}</td>
+        <td class="num">{{ "%.4f"|format(ev.development.mapping.system.accuracy) }}</td>
+      </tr>
+      {% for name, score in ev.holdout.mapping.baselines.items()|sort(attribute="1.accuracy", reverse=true) %}
+      <tr>
+        <td class="muted">{{ name.replace("_", " ") }}</td>
+        <td class="num muted">{{ "%.4f"|format(score.accuracy) }}</td>
+        <td class="num muted">
+          {{ "%.4f"|format(ev.development.mapping.baselines[name].accuracy) }}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<p class="muted" style="max-width:74ch">
+  {{ ev.holdout.mapping.definition }}.
+</p>
+{% endif %}
+
+<h2>The kill criteria</h2>
+<div class="panel wrap" style="padding:0">
+  <table>
+    <thead><tr><th>condition</th><th>measurement</th><th>artifact</th></tr></thead>
+    <tbody>
+      {% set d = artifacts.get("determinism") %}
+      {% if d %}
+      <tr>
+        <td><strong>A</strong> determinism</td>
+        <td>
+          {{ d.runs }} full runs over {{ d.variants }} variants; canonical values
+          {{ "stable" if d.canonical_digest_stable else "DIFFERED" }}, statuses
+          {{ "stable" if d.status_digest_stable else "DIFFERED" }}
+        </td>
+        <td class="mono muted">determinism.json</td>
+      </tr>
+      {% endif %}
+      {% set b = artifacts.get("idempotency") %}
+      {% if b %}
+      <tr>
+        <td><strong>B</strong> idempotent re-ingestion</td>
+        <td>
+          {{ b.files }} files ingested {{ b.ingestions_per_file }}× each into PostgreSQL;
+          {{ b.files_with_more_than_one_canonical_version }} produced a second canonical version,
+          {{ b.ledger_rows_changed_after_first_ingestion }} ledger rows changed after the first
+        </td>
+        <td class="mono muted">idempotency.json</td>
+      </tr>
+      {% endif %}
+      {% set c = artifacts.get("lineage") %}
+      {% if c %}
+      <tr>
+        <td><strong>C</strong> lineage completeness</td>
+        <td>
+          {{ c.cells_checked }} canonical cells inspected individually;
+          {{ c.cells_missing_lineage }} without a complete record
+        </td>
+        <td class="mono muted">lineage.json</td>
+      </tr>
+      {% endif %}
+      {% if ev %}
+      <tr>
+        <td><strong>D</strong> no false MATCHED</td>
+        <td>
+          {{ ev.holdout.reconciliation.false_matched }} on the hold-out, threshold 0.
+          {{ ev.holdout.reconciliation.injected_discrepancies }} discrepancies were injected into
+          the carrier ledger before the reconciler was asked
+        </td>
+        <td class="mono muted">evaluation.json</td>
+      </tr>
+      <tr>
+        <td><strong>E</strong> mapping beats the baselines</td>
+        <td>
+          {{ "%.4f"|format(ev.holdout.mapping.system.accuracy) }} on unseen layouts, against a
+          0.90 floor and the best baseline
+        </td>
+        <td class="mono muted">evaluation.json</td>
+      </tr>
+      {% endif %}
+      {% set f = artifacts.get("abstention") %}
+      {% if f %}
+      <tr>
+        <td><strong>F</strong> abstention</td>
+        <td>
+          {{ f.quarantined }} of {{ f.unmappable_fixtures }} unmappable files quarantined;
+          {{ f.ledger_rows_written_for_unmappable }} ledger rows written for them
+        </td>
+        <td class="mono muted">abstention.json</td>
+      </tr>
+      {% endif %}
+      {% set g = artifacts.get("portability") %}
+      {% if g %}
+      <tr>
+        <td><strong>G</strong> portability</td>
+        <td>
+          {{ g.non_insurance_rows_reconciled }} non-insurance rows through the same engine;
+          {{ g.engine_modules_touched_outside_adapters|length }} engine modules name a family or a
+          canonical field in code they run
+        </td>
+        <td class="mono muted">portability.json</td>
+      </tr>
+      {% endif %}
+      {% set h = artifacts.get("residency") %}
+      {% if h %}
+      <tr>
+        <td><strong>H</strong> residency manifest</td>
+        <td>
+          {{ h.environments|length }} environments; committed manifest agrees with the committed
+          Terraform inputs in
+          {{ h.environments.values()|selectattr("matches_module")|list|length }}
+        </td>
+        <td class="mono muted">residency.json</td>
+      </tr>
+      {% endif %}
+    </tbody>
+  </table>
+</div>
+
+{% if h %}
+<section class="panel" style="border-left:4px solid var(--warn)">
+  <strong>What the residency check does not prove.</strong>
+  <p class="muted" style="margin:6px 0 0; max-width:74ch">{{ h.does_not_prove }}</p>
+</section>
+{% endif %}
+
+{% set corpus = artifacts.get("corpus") %}
+{% if corpus %}
+<h2>The corpus</h2>
+<div class="panel">
+  <div class="grid">
+    <div><div class="muted">Schema variants</div><div class="big">{{ corpus.schema_variants }}</div></div>
+    <div><div class="muted">Canonical rows</div><div class="big">{{ corpus.canonical_rows }}</div></div>
+    <div><div class="muted">Held out</div><div class="big">{{ corpus.held_out_variants }}</div></div>
+    <div><div class="muted">Adversarial cases</div>
+      <div class="big">{{ corpus.adversarial_cases|length }}</div></div>
+  </div>
+  <p class="muted" style="margin:14px 0 0; max-width:74ch">
+    <strong>Synthetic, and openly so.</strong> {{ corpus.notice }}
+    Generator {{ corpus.generator_version }}, seed <code>{{ corpus.seed }}</code>, digest
+    <code>{{ corpus.corpus_digest[:16] }}…</code>. Hold-out rule:
+    <code>{{ corpus.holdout_rule }}</code>.
+  </p>
+</div>
+{% endif %}
+{% endif %}
+{% endblock %}

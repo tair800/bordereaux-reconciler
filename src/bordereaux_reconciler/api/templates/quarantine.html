@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Quarantine — Bordereaux Reconciler{% endblock %}
+{% block content %}
+<h1>Quarantine</h1>
+<p class="lede">
+  Rows that could not be turned into money, and exactly why. This is a queue, not a bin: a row
+  nobody reviews is premium nobody collected. Nothing here was coerced into a value — there is no
+  rule that treats an unparseable amount as zero and none that assumes a missing tax was nil,
+  because either would produce a ledger that balanced while being wrong. Somebody acts on that
+  instead of investigating it, which is why a ledger that refuses to exist is the safer failure.
+</p>
+
+{% if quarantined %}
+<div class="panel wrap" style="padding:0">
+  <table>
+    <thead><tr>
+      <th>file</th><th>coverholder</th><th class="num">sheet row</th>
+      <th>reason</th><th>raw value</th>
+    </tr></thead>
+    <tbody>
+      {% for q in quarantined %}
+      <tr>
+        <td><a href="/files/{{ q.source_content_hash }}">{{ q.filename }}</a></td>
+        <td class="muted">{{ q.coverholder }}</td>
+        <td class="num">{{ q.spreadsheet_row }}</td>
+        <td>{{ q.reason }}</td>
+        <td class="mono">{{ q.raw_value or "—" }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="panel empty">Nothing is awaiting review.</div>
+{% endif %}
+{% endblock %}
